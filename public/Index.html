@@ -1,0 +1,3164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Life Progress Tracker</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.1/font/bootstrap-icons.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --emerald-dark: #006643;
+            --emerald-medium: #00875a;
+            --emerald-light: #00a86b;
+            --emerald-lighter: #e6f7f0;
+        }
+        
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .tab-content {
+            background-color: white;
+            border-radius: 0 0 10px 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+        
+        .nav-tabs .nav-link {
+            color: #495057;
+            font-weight: 600;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px 10px 0 0;
+        }
+        
+        .nav-tabs .nav-link.active {
+            background-color: white;
+            color: var(--emerald-dark);
+            border-top: 3px solid var(--emerald-dark);
+        }
+        
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+            transition: transform 0.2s;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .card-header {
+            background-color: var(--emerald-lighter);
+            color: var(--emerald-dark);
+            font-weight: bold;
+            border-radius: 10px 10px 0 0 !important;
+            padding: 15px 20px;
+        }
+        
+        .progress {
+            height: 24px; /* Increased for better touch targets */
+            border-radius: 12px;
+            margin: 10px 0; /* Added margin for better spacing */
+        }
+        
+        .progress-bar {
+            background-color: var(--emerald-dark);
+            font-size: 14px; /* Larger font for readability */
+            line-height: 24px; /* Center text vertically */
+        }
+        
+        .form-range {
+            height: 30px; /* Larger touch target */
+            padding: 5px 0; /* Padding for more comfortable touch */
+        }
+        
+        .form-range::-webkit-slider-thumb {
+            background: var(--emerald-dark);
+            width: 24px; /* Larger thumb */
+            height: 24px; /* Larger thumb */
+            margin-top: -8px; /* Adjust for larger thumb */
+        }
+        
+        .form-range::-moz-range-thumb {
+            background: var(--emerald-dark);
+            width: 24px; /* Larger thumb */
+            height: 24px; /* Larger thumb */
+        }
+        
+        .btn-primary {
+            background-color: var(--emerald-dark);
+            border-color: var(--emerald-dark);
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--emerald-medium);
+            border-color: var(--emerald-medium);
+        }
+        
+        .btn-outline-primary {
+            color: var(--emerald-dark);
+            border-color: var(--emerald-dark);
+        }
+        
+        .btn-outline-primary:hover {
+            background-color: var(--emerald-dark);
+            border-color: var(--emerald-dark);
+        }
+        
+        .form-control:focus {
+            border-color: var(--emerald-light);
+            box-shadow: 0 0 0 0.25rem rgba(0, 102, 67, 0.25);
+        }
+        
+        .header {
+            background-color: var(--emerald-dark);
+            color: white;
+            padding: 20px 0;
+            border-radius: 10px 10px 0 0;
+            margin-bottom: 0;
+        }
+        
+        .icon-large {
+            font-size: 24px;
+            margin-right: 10px;
+        }
+        
+        .section-divider {
+            height: 3px;
+            background: linear-gradient(to right, var(--emerald-dark), var(--emerald-light), transparent);
+            margin: 20px 0;
+            border-radius: 3px;
+        }
+        
+        .category-title {
+            color: var(--emerald-dark);
+            border-bottom: 2px solid var(--emerald-light);
+            padding-bottom: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .surah-progress {
+            margin-bottom: 5px;
+        }
+        
+        #quranMemorizationList .list-group-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .goal-timeline {
+            position: relative;
+            margin-bottom: 30px;
+        }
+        
+        .timeline-marker {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background-color: var(--emerald-medium);
+            position: absolute;
+            top: -7px;
+        }
+        
+        .achievement-icon {
+            font-size: 32px;
+            color: var(--emerald-dark);
+            margin-bottom: 10px;
+        }
+        
+        .readonly-progress {
+            pointer-events: none;
+            opacity: 0.8;
+        }
+        
+        .card-body {
+            padding: 20px;
+        }
+        
+        /* Dark mode toggle */
+        .dark-mode-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            background-color: var(--emerald-dark);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Master save button styling */
+        .master-controls {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-radius: 0 0 10px 10px;
+        }
+        
+        /* Sync status indicator */
+        .sync-status {
+            font-size: 12px;
+            margin-top: 5px;
+        }
+        
+        /* Android-style slider */
+        .android-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            height: 30px;
+            background: #e6e6e6;
+            outline: none;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
+        }
+        
+        .android-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: var(--emerald-dark);
+            cursor: pointer;
+            border: 4px solid #fff;
+            box-shadow: -410px 0 0 400px var(--emerald-dark);
+        }
+        
+        /* Memorized Surah style */
+        .memorized-surah {
+            background-color: rgba(0, 166, 107, 0.2);
+            color: var(--emerald-dark);
+            font-weight: bold;
+        }
+        
+        /* Login screen */
+        #loginScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 102, 67, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        
+        .login-box {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+        }
+        
+        .app-content {
+            display: none;
+        }
+        
+        /* Connection status indicator */
+        .connection-indicator {
+            display: inline-flex;
+            align-items: center;
+            font-size: 14px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            margin-left: 10px;
+        }
+        
+        .connection-indicator.connected {
+            background-color: rgba(25, 135, 84, 0.2);
+            color: #198754;
+        }
+        
+        .connection-indicator.disconnected {
+            background-color: rgba(220, 53, 69, 0.2);
+            color: #dc3545;
+        }
+        
+        .connection-indicator i {
+            margin-right: 4px;
+            font-size: 16px;
+        }
+        
+        /* Save button animation */
+        @keyframes saveAnimation {
+            0% { background-color: var(--emerald-dark); }
+            50% { background-color: #198754; }
+            100% { background-color: var(--emerald-dark); }
+        }
+        
+        .save-animation {
+            animation: saveAnimation 1.5s ease;
+        }
+        
+        /* Toast notification */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1100;
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="loginScreen">
+        <div class="login-box">
+            <div class="text-center mb-4">
+                <h2 class="text-success"><i class="bi bi-shield-lock"></i> Protected App</h2>
+                <p>Enter password to continue</p>
+            </div>
+            <div class="mb-3">
+                <input type="password" class="form-control" id="passwordInput" placeholder="Enter password">
+                <div class="form-text text-danger" id="passwordError"></div>
+            </div>
+            <button class="btn btn-success w-100" onclick="checkPassword()">Login</button>
+        </div>
+    </div>
+
+    <!-- Toast container for notifications -->
+    <div class="toast-container"></div>
+
+    <!-- Main App Content -->
+    <div class="app-content">
+        <div class="container mt-4 mb-5">
+            <div class="header text-center mb-0">
+                <h1><i class="bi bi-bar-chart-line"></i> Personal Progress Tracker</h1>
+                <p class="lead">Track your journey in Religion, Life, and Tomorrow</p>
+            </div>
+            
+            <!-- Master Save Controls -->
+            <div class="master-controls mb-3 bg-light p-3 rounded d-flex justify-content-between align-items-center shadow-sm">
+                <div>
+                    <button class="btn btn-success" id="saveAllButton" onclick="saveAllData()">
+                        <i class="bi bi-save"></i> Save All Data
+                    </button>
+                </div>
+                <div class="d-flex align-items-center">
+                    <div class="sync-status text-center" id="syncStatus"></div>
+                    <div class="connection-indicator ms-2" id="connectionStatus">
+                        <i class="bi bi-heart-pulse"></i>
+                        <span>Checking connection...</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tabs -->
+            <ul class="nav nav-tabs" id="myTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="religion-tab" data-bs-toggle="tab" data-bs-target="#religion" type="button" role="tab" aria-controls="religion" aria-selected="true">
+                        <i class="bi bi-book"></i> Religion
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="life-tab" data-bs-toggle="tab" data-bs-target="#life" type="button" role="tab" aria-controls="life" aria-selected="false">
+                        <i class="bi bi-heart-pulse"></i> Life
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="tomorrow-tab" data-bs-toggle="tab" data-bs-target="#tomorrow" type="button" role="tab" aria-controls="tomorrow" aria-selected="false">
+                        <i class="bi bi-calendar-check"></i> Tomorrow
+                    </button>
+                </li>
+            </ul>
+            
+            <!-- Tab Content -->
+            <div class="tab-content" id="myTabContent">
+                <!-- Religion Tab -->
+                <div class="tab-pane fade show active" id="religion" role="tabpanel" aria-labelledby="religion-tab">
+                    <h2 class="category-title"><i class="bi bi-book icon-large"></i>Religious Growth</h2>
+                    
+                    <!-- Quran Recitation -->
+                    <div class="card mb-4">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="bi bi-mic"></i> Quran Recitation
+                            </div>
+                            <div class="text-muted small">Daily Target: 10 pages</div>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label for="quranRecitationDate" class="form-label">Date</label>
+                                <input type="date" class="form-control" id="quranRecitationDate" value="">
+                            </div>
+                            <div class="mb-3">
+                                <label for="quranRecitationPages" class="form-label">Pages Recited Today: <span id="quranRecitationValue">0</span></label>
+                                <input type="range" class="form-range android-slider" min="0" max="20" step="1" id="quranRecitationPages" value="0" oninput="updateRecitationValue(this.value)">
+                            </div>
+                            <div class="progress mb-3" role="progressbar">
+                                <div class="progress-bar" id="quranRecitationProgress" style="width: 0%">0%</div>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <button class="btn btn-outline-primary btn-sm" onclick="saveRecitation()">Save Today's Progress</button>
+                                <button class="btn btn-outline-primary btn-sm" data-bs-toggle="collapse" data-bs-target="#quranRecitationHistory">History</button>
+                            </div>
+                            <div class="collapse mt-3" id="quranRecitationHistory">
+                                <div class="card card-body bg-light">
+                                    <h6>Recent History</h6>
+                                    <ul class="list-group" id="recitationHistoryList">
+                                        <!-- Will be populated by JavaScript -->
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Quran Memorization -->
+                    <div class="card mb-4">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="bi bi-journal-text"></i> Quran Memorization
+                            </div>
+                            <div>
+                                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addSurahModal">Add Memorized Surah</button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <h6>Current Memorization Project:</h6>
+                            <div class="input-group mb-3">
+                                <select class="form-select" id="currentSurah">
+                                    <option value="">Select a Surah</option>
+                                    <!-- Surah list will be populated by JavaScript -->
+                                </select>
+                                <button class="btn btn-outline-primary" type="button" onclick="updateCurrentSurah()">Update</button>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="memorizeProgress" class="form-label">Current Surah Progress: <span id="memorizeProgressValue">0</span>%</label>
+                                <input type="range" class="form-range android-slider" min="0" max="100" step="5" id="memorizeProgress" value="0" oninput="updateMemorizeValue(this.value)">
+                            </div>
+                            <div class="progress mb-3" role="progressbar">
+                                <div class="progress-bar" id="memorizeProgressBar" style="width: 0%">0%</div>
+                            </div>
+                            
+                            <h6 class="mt-4">Memorized Surahs:</h6>
+                            <ul class="list-group" id="quranMemorizationList">
+                                <!-- Will be populated by JavaScript -->
+                            </ul>
+                            
+                            <div class="mt-3">
+                                <h6>Overall Quran Memorization:</h6>
+                                <div class="progress readonly-progress" role="progressbar">
+                                    <div class="progress-bar" id="overallMemorizationProgress" style="width: 0%">0%</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Islamic Reading -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <i class="bi bi-book-half"></i> Islamic Readings
+                        </div>
+                        <div class="card-body">
+                            <h6>Current Book:</h6>
+                            <div class="input-group mb-3">
+                                <input type="text" class="form-control" id="currentBook" placeholder="Book Title">
+                                <button class="btn btn-outline-primary" type="button" onclick="updateCurrentBook()">Update</button>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="readingProgress" class="form-label">Reading Progress: <span id="readingProgressValue">0</span>%</label>
+                                <input type="range" class="form-range android-slider" min="0" max="100" step="5" id="readingProgress" value="0" oninput="updateReadingValue(this.value)">
+                            </div>
+                            <div class="progress mb-3" role="progressbar">
+                                <div class="progress-bar" id="readingProgressBar" style="width: 0%">0%</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="readingNotes" class="form-label">Reading Notes:</label>
+                                <textarea class="form-control" id="readingNotes" rows="3" placeholder="Key learnings from your reading"></textarea>
+                            </div>
+                            
+                            <h6 class="mt-4">Completed Books:</h6>
+                            <ul class="list-group" id="completedBooksList">
+                                <!-- Will be populated by JavaScript -->
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <!-- Islamic Learning -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <i class="bi bi-lightbulb"></i> Islamic Learning
+                        </div>
+                        <div class="card-body">
+                            <h6>Current Focus:</h6>
+                            <div class="input-group mb-3">
+                                <select class="form-select" id="islamicFocus">
+                                    <option value="">Select a focus area</option>
+                                    <option value="Fiqh">Fiqh (Islamic Jurisprudence)</option>
+                                    <option value="Tafsir">Tafsir (Quran Interpretation)</option>
+                                    <option value="Hadith">Hadith Studies</option>
+                                    <option value="Seerah">Seerah (Prophet's Biography)</option>
+                                    <option value="Aqeedah">Aqeedah (Islamic Creed)</option>
+                                    <option value="Arabic">Arabic Language</option>
+                                    <option value="History">Islamic History</option>
+                                    <option value="Ethics">Islamic Ethics</option>
+                                    <option value="custom">Other (Specify)</option>
+                                </select>
+                                <input type="text" class="form-control d-none" id="customIslamicFocus" placeholder="Specify focus area">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="learningProgress" class="form-label">Learning Progress: <span id="learningProgressValue">0</span>%</label>
+                                <input type="range" class="form-range android-slider" min="0" max="100" step="5" id="learningProgress" value="0" oninput="updateLearningValue(this.value)">
+                            </div>
+                            <div class="progress mb-3" role="progressbar">
+                                <div class="progress-bar" id="learningProgressBar" style="width: 0%">0%</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="learningResources" class="form-label">Resources:</label>
+                                <textarea class="form-control" id="learningResources" rows="2" placeholder="Books, courses, or scholars you're learning from"></textarea>
+                            </div>
+                            
+                            <button class="btn btn-outline-primary btn-sm" onclick="saveLearningProgress()">Save Progress</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Good Deeds -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <i class="bi bi-hand-thumbs-up"></i> Good Deeds
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <div class="card h-100">
+                                        <div class="card-body text-center">
+                                            <i class="bi bi-cash-coin achievement-icon"></i>
+                                            <h6>Charity</h6>
+                                            <div class="mb-3">
+                                                <label for="charityAmount" class="form-label">Monthly Goal: <span id="charityGoal">500</span> SAR</label>
+                                                <div class="input-group mb-2">
+                                                    <input type="number" class="form-control" id="charityAmount" placeholder="Amount" min="0">
+                                                    <button class="btn btn-outline-primary" onclick="addCharity()">Add</button>
+                                                </div>
+                                            </div>
+                                            <div class="progress mb-2">
+                                                <div class="progress-bar" id="charityProgress" style="width: 0%">0%</div>
+                                            </div>
+                                            <small class="text-muted">This Month: <span id="charityTotal">0</span> SAR</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <div class="card h-100">
+                                        <div class="card-body text-center">
+                                            <i class="bi bi-building achievement-icon"></i>
+                                            <h6>Umrah Planning</h6>
+                                            <div class="mb-3">
+                                                <label for="umrahDate" class="form-label">Target Date:</label>
+                                                <input type="date" class="form-control mb-2" id="umrahDate">
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="umrahSavings" class="form-label">Savings: <span id="umrahSavingsValue">0</span>%</label>
+                                                <input type="range" class="form-range android-slider" min="0" max="100" id="umrahSavings" oninput="updateUmrahValue(this.value)">
+                                            </div>
+                                            <div class="progress">
+                                                <div class="progress-bar" id="umrahProgressBar" style="width: 0%">0%</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-4">
+                                <h6>Daily Good Deeds Checklist:</h6>
+                                <div class="mb-3 form-check">
+                                    <input type="checkbox" class="form-check-input" id="deedPrayers">
+                                    <label class="form-check-label" for="deedPrayers">Completed all prayers on time</label>
+                                </div>
+                                <div class="mb-3 form-check">
+                                    <input type="checkbox" class="form-check-input" id="deedDhikr">
+                                    <label class="form-check-label" for="deedDhikr">Daily Dhikr (Remembrance)</label>
+                                </div>
+                                <div class="mb-3 form-check">
+                                    <input type="checkbox" class="form-check-input" id="deedHelp">
+                                    <label class="form-check-label" for="deedHelp">Helped someone today</label>
+                                </div>
+                                <div class="mb-3 form-check">
+                                    <input type="checkbox" class="form-check-input" id="deedParents">
+                                    <label class="form-check-label" for="deedParents">Connected with parents/family</label>
+                                </div>
+                                
+                                <!-- Custom deed -->
+                                <div class="input-group mb-3">
+                                    <input type="text" class="form-control" id="customDeed" placeholder="Add another good deed...">
+                                    <button class="btn btn-outline-primary" type="button" onclick="addCustomDeed()">Add</button>
+                                </div>
+                                
+                                <div id="customDeedsList">
+                                    <!-- Will be populated by JavaScript -->
+                                </div>
+                                
+                                <button class="btn btn-primary mt-3" onclick="saveGoodDeeds()">Save Today's Deeds</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Life Tab -->
+                <div class="tab-pane fade" id="life" role="tabpanel" aria-labelledby="life-tab">
+                    <h2 class="category-title"><i class="bi bi-heart-pulse icon-large"></i>Life Quality</h2>
+                    
+                    <!-- Health Section - Simplified -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <i class="bi bi-activity"></i> Physical Health
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label for="overallHealth" class="form-label">Overall Health: <span id="healthValue">7</span>/10</label>
+                                <input type="range" class="form-range android-slider" min="1" max="10" step="1" id="overallHealth" value="7" oninput="updateHealthValue(this.value)">
+                                <div class="progress mb-3">
+                                    <div class="progress-bar" id="healthProgress" style="width: 70%">70%</div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="healthGoals" class="form-label">Health Goals:</label>
+                                <textarea class="form-control" id="healthGoals" rows="2" placeholder="What are your health goals?"></textarea>
+                            </div>
+                            
+                            <button class="btn btn-outline-primary" onclick="saveHealthData()">Save Health Data</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Living Environment -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <i class="bi bi-house-heart"></i> Living Environment
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="cleaningState" class="form-label">Cleanliness: <span id="cleaningValue">5</span>/10</label>
+                                    <input type="range" class="form-range android-slider" min="1" max="10" step="1" id="cleaningState" value="5" oninput="updateCleaningValue(this.value)">
+                                    <div class="progress mb-3">
+                                        <div class="progress-bar" id="cleaningProgress" style="width: 50%">50%</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label for="livingState" class="form-label">Living Satisfaction: <span id="livingValue">5</span>/10</label>
+                                    <input type="range" class="form-range android-slider" min="1" max="10" step="1" id="livingState" value="5" oninput="updateLivingValue(this.value)">
+                                    <div class="progress mb-3">
+                                        <div class="progress-bar" id="livingProgress" style="width: 50%">50%</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <h6>Weekly Cleaning Tasks:</h6>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" value="" id="taskVacuum">
+                                    <label class="form-check-label" for="taskVacuum">
+                                        Vacuum/Sweep Floors
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" value="" id="taskBathroom">
+                                    <label class="form-check-label" for="taskBathroom">
+                                        Clean Bathroom
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" value="" id="taskKitchen">
+                                    <label class="form-check-label" for="taskKitchen">
+                                        Clean Kitchen
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" value="" id="taskLaundry">
+                                    <label class="form-check-label" for="taskLaundry">
+                                        Do Laundry
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="" id="taskDeclutter">
+                                    <label class="form-check-label" for="taskDeclutter">
+                                        Declutter Living Space
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="improvementsNeeded" class="form-label">Improvements Needed:</label>
+                                <textarea class="form-control" id="improvementsNeeded" rows="2" placeholder="What would improve your living space?"></textarea>
+                            </div>
+                            
+                            <button class="btn btn-outline-primary" onclick="saveLivingData()">Save Living Data</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Nutrition & Food - Simplified -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <i class="bi bi-egg-fried"></i> Nutrition & Food
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label for="mealQuality" class="form-label">Meal Quality: <span id="mealValue">5</span>/10</label>
+                                <input type="range" class="form-range android-slider" min="1" max="10" step="1" id="mealQuality" value="5" oninput="updateMealValue(this.value)">
+                                <div class="progress mb-3">
+                                    <div class="progress-bar" id="mealProgress" style="width: 50%">50%</div>
+                                </div>
+                            </div>
+                            
+                            <button class="btn btn-outline-primary" onclick="saveNutritionData()">Save Nutrition Data</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Personal Appearance -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <i class="bi bi-person-square"></i> Personal Appearance
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="wardrobeState" class="form-label">Wardrobe Status: <span id="wardrobeValue">5</span>/10</label>
+                                    <input type="range" class="form-range android-slider" min="1" max="10" step="1" id="wardrobeState" value="5" oninput="updateWardrobeValue(this.value)">
+                                    <div class="progress mb-3">
+                                        <div class="progress-bar" id="wardrobeProgress" style="width: 50%">50%</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label for="grooming" class="form-label">Grooming & Hygiene: <span id="groomingValue">7</span>/10</label>
+                                    <input type="range" class="form-range android-slider" min="1" max="10" step="1" id="grooming" value="7" oninput="updateGroomingValue(this.value)">
+                                    <div class="progress mb-3">
+                                        <div class="progress-bar" id="groomingProgress" style="width: 70%">70%</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <h6>Clothing Needs:</h6>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" value="" id="needWork">
+                                    <label class="form-check-label" for="needWork">
+                                        Work clothes
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" value="" id="needCasual">
+                                    <label class="form-check-label" for="needCasual">
+                                        Casual clothes
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" value="" id="needSports">
+                                    <label class="form-check-label" for="needSports">
+                                        Sports/workout clothes
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" value="" id="needShoes">
+                                    <label class="form-check-label" for="needShoes">
+                                        Shoes
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" value="" id="needAccessories">
+                                    <label class="form-check-label" for="needAccessories">
+                                        Accessories
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="appearanceGoals" class="form-label">Appearance Goals:</label>
+                                <textarea class="form-control" id="appearanceGoals" rows="2" placeholder="How would you like to improve your appearance?"></textarea>
+                            </div>
+                            
+                            <button class="btn btn-outline-primary" onclick="saveAppearanceData()">Save Appearance Data</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Social & Community -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <i class="bi bi-people"></i> Social & Community
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label for="socialSatisfaction" class="form-label">Social Life Satisfaction: <span id="socialValue">5</span>/10</label>
+                                <input type="range" class="form-range android-slider" min="1" max="10" step="1" id="socialSatisfaction" value="5" oninput="updateSocialValue(this.value)">
+                                <div class="progress mb-3">
+                                    <div class="progress-bar" id="socialProgress" style="width: 50%">50%</div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <h6>Weekly Social Activities:</h6>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" value="" id="activityFamily">
+                                    <label class="form-check-label" for="activityFamily">
+                                        Family connection
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" value="" id="activityFriends">
+                                    <label class="form-check-label" for="activityFriends">
+                                        Time with friends
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" value="" id="activityCommunity">
+                                    <label class="form-check-label" for="activityCommunity">
+                                        Community event/gathering
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" value="" id="activityMosque">
+                                    <label class="form-check-label" for="activityMosque">
+                                        Mosque/Islamic center activity
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="socialGoals" class="form-label">Social Connection Goals:</label>
+                                <textarea class="form-control" id="socialGoals" rows="2" placeholder="How would you like to improve your social connections?"></textarea>
+                            </div>
+                            
+                            <button class="btn btn-outline-primary" onclick="saveSocialData()">Save Social Data</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Tomorrow Tab -->
+                <div class="tab-pane fade" id="tomorrow" role="tabpanel" aria-labelledby="tomorrow-tab">
+                    <h2 class="category-title"><i class="bi bi-calendar-check icon-large"></i>Future Goals</h2>
+                    
+                    <!-- Marriage Section -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <i class="bi bi-heart"></i> Marriage Preparation
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label for="marriageTimeline" class="form-label">Timeline Goal: <span id="marriageTimelineValue">3</span> years</label>
+                                <input type="range" class="form-range android-slider" min="1" max="5" step="1" id="marriageTimeline" value="3" oninput="updateMarriageTimelineValue(this.value)">
+                            </div>
+                            
+                            <div class="mb-4">
+                                <h6>Preparation Progress:</h6>
+                                
+                                <div class="mb-3">
+                                    <label for="financialReadiness" class="form-label">Financial Readiness: <span id="financialReadinessValue">0</span>%</label>
+                                    <input type="range" class="form-range android-slider" min="0" max="100" step="10" id="financialReadiness" value="0" oninput="updateFinancialReadinessValue(this.value)">
+                                    <div class="progress">
+                                        <div class="progress-bar" id="financialReadinessProgress" style="width: 0%">0%</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="personalReadiness" class="form-label">Personal Readiness: <span id="personalReadinessValue">0</span>%</label>
+                                    <input type="range" class="form-range android-slider" min="0" max="100" step="10" id="personalReadiness" value="0" oninput="updatePersonalReadinessValue(this.value)">
+                                    <div class="progress">
+                                        <div class="progress-bar" id="personalReadinessProgress" style="width: 0%">0%</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="housingReadiness" class="form-label">Housing Readiness: <span id="housingReadinessValue">0</span>%</label>
+                                    <input type="range" class="form-range android-slider" min="0" max="100" step="10" id="housingReadiness" value="0" oninput="updateHousingReadinessValue(this.value)">
+                                    <div class="progress">
+                                        <div class="progress-bar" id="housingReadinessProgress" style="width: 0%">0%</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <h6>Marriage Savings:</h6>
+                                <div class="input-group mb-3">
+                                    <span class="input-group-text">Goal</span>
+                                    <input type="number" class="form-control" id="marriageSavingsGoal" value="50000" min="0">
+                                    <span class="input-group-text">SAR</span>
+                                </div>
+                                
+                                <div class="input-group mb-3">
+                                    <span class="input-group-text">Current</span>
+                                    <input type="number" class="form-control" id="marriageSavingsCurrent" value="0" min="0">
+                                    <span class="input-group-text">SAR</span>
+                                    <button class="btn btn-outline-primary" type="button" onclick="updateMarriageSavings()">Update</button>
+                                </div>
+                                
+                                <div class="progress mb-2">
+                                    <div class="progress-bar" id="marriageSavingsProgress" style="width: 0%">0%</div>
+                                </div>
+                                <small class="text-muted">At current saving rate, goal will be reached in <span id="marriageSavingsTime">0</span> months</small>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <h6>Islamic Knowledge for Marriage:</h6>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" value="" id="knowledgeRights">
+                                    <label class="form-check-label" for="knowledgeRights">
+                                        Rights & responsibilities in marriage
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" value="" id="knowledgeCommunication">
+                                    <label class="form-check-label" for="knowledgeCommunication">
+                                        Islamic principles of communication
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" value="" id="knowledgeFamily">
+                                    <label class="form-check-label" for="knowledgeFamily">
+                                        Family structure in Islam
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="marriageNotes" class="form-label">Marriage Preparation Notes:</label>
+                                <textarea class="form-control" id="marriageNotes" rows="2" placeholder="Additional thoughts or plans..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Vehicle Purchase -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <i class="bi bi-car-front"></i> Vehicle Purchase
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label for="vehicleTimeline" class="form-label">Timeline Goal: <span id="vehicleTimelineValue">2</span> years</label>
+                                <input type="range" class="form-range android-slider" min="1" max="5" step="1" id="vehicleTimeline" value="2" oninput="updateVehicleTimelineValue(this.value)">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <h6>Vehicle Savings:</h6>
+                                <div class="input-group mb-3">
+                                    <span class="input-group-text">Goal</span>
+                                    <input type="number" class="form-control" id="vehicleSavingsGoal" value="40000" min="0">
+                                    <span class="input-group-text">SAR</span>
+                                </div>
+                                
+                                <div class="input-group mb-3">
+                                    <span class="input-group-text">Current</span>
+                                    <input type="number" class="form-control" id="vehicleSavingsCurrent" value="0" min="0">
+                                    <span class="input-group-text">SAR</span>
+                                    <button class="btn btn-outline-primary" type="button" onclick="updateVehicleSavings()">Update</button>
+                                </div>
+                                
+                                <div class="progress mb-2">
+                                    <div class="progress-bar" id="vehicleSavingsProgress" style="width: 0%">0%</div>
+                                </div>
+                                <small class="text-muted">At current saving rate, goal will be reached in <span id="vehicleSavingsTime">0</span> months</small>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <h6>Vehicle Research:</h6>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" value="" id="researchModels">
+                                    <label class="form-check-label" for="researchModels">
+                                        Researched suitable models
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" value="" id="researchCosts">
+                                    <label class="form-check-label" for="researchCosts">
+                                        Researched ownership costs
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" value="" id="researchFinancing">
+                                    <label class="form-check-label" for="researchFinancing">
+                                        Explored halal financing options
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" value="" id="researchInsurance">
+                                    <label class="form-check-label" for="researchInsurance">
+                                        Researched insurance costs
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="vehicleNotes" class="form-label">Vehicle Purchase Notes:</label>
+                                <textarea class="form-control" id="vehicleNotes" rows="2" placeholder="Additional thoughts or plans..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Apartment Furnishing -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <i class="bi bi-house"></i> Apartment Furnishing (Cairo)
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label for="furnishingTimeline" class="form-label">Timeline Goal: <span id="furnishingTimelineValue">1</span> years</label>
+                                <input type="range" class="form-range android-slider" min="1" max="5" step="1" id="furnishingTimeline" value="1" oninput="updateFurnishingTimelineValue(this.value)">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <h6>Furnishing Budget:</h6>
+                                <div class="input-group mb-3">
+                                    <span class="input-group-text">Goal</span>
+                                    <input type="number" class="form-control" id="furnishingBudgetGoal" value="30000" min="0">
+                                    <span class="input-group-text">SAR</span>
+                                </div>
+                                
+                                <div class="input-group mb-3">
+                                    <span class="input-group-text">Current</span>
+                                    <input type="number" class="form-control" id="furnishingBudgetCurrent" value="0" min="0">
+                                    <span class="input-group-text">SAR</span>
+                                    <button class="btn btn-outline-primary" type="button" onclick="updateFurnishingBudget()">Update</button>
+                                </div>
+                                
+                                <div class="progress mb-2">
+                                    <div class="progress-bar" id="furnishingBudgetProgress" style="width: 0%">0%</div>
+                                </div>
+                                <small class="text-muted">At current saving rate, goal will be reached in <span id="furnishingSavingsTime">0</span> months</small>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <h6>Furnishing Progress by Room:</h6>
+                                
+                                <div class="mb-3">
+                                    <label for="livingRoomProgress" class="form-label">Living Room: <span id="livingRoomValue">0</span>%</label>
+                                    <input type="range" class="form-range android-slider" min="0" max="100" step="10" id="livingRoomProgress" value="0" oninput="updateLivingRoomValue(this.value)">
+                                    <div class="progress">
+                                        <div class="progress-bar" id="livingRoomProgressBar" style="width: 0%">0%</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="bedroomProgress" class="form-label">Bedroom: <span id="bedroomValue">0</span>%</label>
+                                    <input type="range" class="form-range android-slider" min="0" max="100" step="10" id="bedroomProgress" value="0" oninput="updateBedroomValue(this.value)">
+                                    <div class="progress">
+                                        <div class="progress-bar" id="bedroomProgressBar" style="width: 0%">0%</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="kitchenProgress" class="form-label">Kitchen: <span id="kitchenValue">0</span>%</label>
+                                    <input type="range" class="form-range android-slider" min="0" max="100" step="10" id="kitchenProgress" value="0" oninput="updateKitchenValue(this.value)">
+                                    <div class="progress">
+                                        <div class="progress-bar" id="kitchenProgressBar" style="width: 0%">0%</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="bathroomProgress" class="form-label">Bathroom: <span id="bathroomValue">0</span>%</label>
+                                    <input type="range" class="form-range android-slider" min="0" max="100" step="10" id="bathroomProgress" value="0" oninput="updateBathroomValue(this.value)">
+                                    <div class="progress">
+                                        <div class="progress-bar" id="bathroomProgressBar" style="width: 0%">0%</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="furnishingNotes" class="form-label">Furnishing Notes:</label>
+                                <textarea class="form-control" id="furnishingNotes" rows="2" placeholder="Additional thoughts or plans..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Career Growth -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <i class="bi bi-briefcase"></i> Career Growth
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <h6>Career Goals:</h6>
+                                <div class="mb-3">
+                                    <label for="careerShortTerm" class="form-label">Short-term Goal (1 year):</label>
+                                    <input type="text" class="form-control" id="careerShortTerm" placeholder="E.g., Learn new skill, get promotion...">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="careerMidTerm" class="form-label">Mid-term Goal (3 years):</label>
+                                    <input type="text" class="form-control" id="careerMidTerm" placeholder="E.g., Management role, change company...">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="careerLongTerm" class="form-label">Long-term Goal (5+ years):</label>
+                                    <input type="text" class="form-control" id="careerLongTerm" placeholder="E.g., Senior position, own business...">
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <h6>Skills Development:</h6>
+                                <div class="mb-3">
+                                    <label for="currentSkill" class="form-label">Current Skill Focus:</label>
+                                    <input type="text" class="form-control" id="currentSkill" placeholder="Skill you're currently developing">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="skillProgress" class="form-label">Skill Progress: <span id="skillProgressValue">0</span>%</label>
+                                    <input type="range" class="form-range android-slider" min="0" max="100" step="5" id="skillProgress" value="0" oninput="updateSkillProgressValue(this.value)">
+                                    <div class="progress">
+                                        <div class="progress-bar" id="skillProgressBar" style="width: 0%">0%</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <h6>Salary Goals:</h6>
+                                <div class="input-group mb-3">
+                                    <span class="input-group-text">Current</span>
+                                    <input type="number" class="form-control" id="currentSalary" value="5200" min="0">
+                                    <span class="input-group-text">SAR</span>
+                                </div>
+                                <div class="input-group mb-3">
+                                    <span class="input-group-text">Target</span>
+                                    <input type="number" class="form-control" id="targetSalary" value="8000" min="0">
+                                    <span class="input-group-text">SAR</span>
+                                </div>
+                                <div class="progress">
+                                    <div class="progress-bar" id="salaryProgress" style="width: 65%">65%</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Add Surah Modal -->
+    <div class="modal fade" id="addSurahModal" tabindex="-1" aria-labelledby="addSurahModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addSurahModalLabel">Add Memorized Surah</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="surahName" class="form-label">Surah Name</label>
+                        <select class="form-select" id="surahName">
+                            <option value="">Select a Surah</option>
+                            <!-- Surah list will be populated by JavaScript -->
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="memorizationDate" class="form-label">Date Memorized</label>
+                        <input type="date" class="form-control" id="memorizationDate">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="addMemorizedSurah()">Add Surah</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Dark Mode Toggle -->
+    <button class="dark-mode-toggle" id="darkModeToggle">
+        <i class="bi bi-moon-stars"></i>
+    </button>
+    
+    <!-- Bootstrap and JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Password verification
+        function checkPassword() {
+            const password = document.getElementById('passwordInput').value;
+            const correctPassword = "ScorePion!#%790";
+            
+            if (password === correctPassword) {
+                document.getElementById('loginScreen').style.display = 'none';
+                document.querySelector('.app-content').style.display = 'block';
+                // Load data from cloud when app starts
+                syncDataFromSheet();
+            } else {
+                document.getElementById('passwordError').textContent = 'Incorrect password. Please try again.';
+            }
+        }
+        
+        // Allow Enter key to submit password
+        document.getElementById('passwordInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                checkPassword();
+            }
+        });
+        
+        // Connection status indicator
+        let connectionStatus = false;
+
+        function updateConnectionStatus(status) {
+            const indicator = document.getElementById('connectionStatus');
+            
+            if (status) {
+                indicator.className = 'connection-indicator connected';
+                indicator.innerHTML = '<i class="bi bi-heart-pulse"></i> <span>Connected</span>';
+                connectionStatus = true;
+            } else {
+                indicator.className = 'connection-indicator disconnected';
+                indicator.innerHTML = '<i class="bi bi-heartbreak"></i> <span>Disconnected</span>';
+                connectionStatus = false;
+            }
+        }
+        
+        // Toast notification function
+        function showToast(message, type = 'success') {
+            const toastContainer = document.querySelector('.toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast align-items-center text-white bg-${type} border-0`;
+            toast.setAttribute('role', 'alert');
+            toast.setAttribute('aria-live', 'assertive');
+            toast.setAttribute('aria-atomic', 'true');
+            
+            toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">
+                        ${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            `;
+            
+            toastContainer.appendChild(toast);
+            const bsToast = new bootstrap.Toast(toast, { autohide: true, delay: 3000 });
+            bsToast.show();
+            
+            // Remove toast after hiding
+            toast.addEventListener('hidden.bs.toast', function() {
+                toast.remove();
+            });
+        }
+        
+        // Save button animation
+        function animateSaveButton(buttonId = 'saveAllButton') {
+            const button = document.getElementById(buttonId);
+            button.classList.add('save-animation');
+            
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="bi bi-check-circle"></i> Saved!';
+            
+            setTimeout(() => {
+                button.innerHTML = originalText;
+                button.classList.remove('save-animation');
+            }, 1500);
+        }
+        
+        // Quran Surahs data
+        const quranSurahs = [
+            {name: "Al-Fatihah", ayahs: 7},
+            {name: "Al-Baqarah", ayahs: 286},
+            {name: "Aal-E-Imran", ayahs: 200},
+            {name: "An-Nisa", ayahs: 176},
+            {name: "Al-Ma'idah", ayahs: 120},
+            {name: "Al-An'am", ayahs: 165},
+            {name: "Al-A'raf", ayahs: 206},
+            {name: "Al-Anfal", ayahs: 75},
+            {name: "At-Tawbah", ayahs: 129},
+            {name: "Yunus", ayahs: 109},
+            {name: "Hud", ayahs: 123},
+            {name: "Yusuf", ayahs: 111},
+            {name: "Ar-Ra'd", ayahs: 43},
+            {name: "Ibrahim", ayahs: 52},
+            {name: "Al-Hijr", ayahs: 99},
+            {name: "An-Nahl", ayahs: 128},
+            {name: "Al-Isra", ayahs: 111},
+            {name: "Al-Kahf", ayahs: 110},
+            {name: "Maryam", ayahs: 98},
+            {name: "Ta-Ha", ayahs: 135},
+            {name: "Al-Anbiya", ayahs: 112},
+            {name: "Al-Hajj", ayahs: 78},
+            {name: "Al-Mu'minun", ayahs: 118},
+            {name: "An-Nur", ayahs: 64},
+            {name: "Al-Furqan", ayahs: 77},
+            {name: "Ash-Shu'ara", ayahs: 227},
+            {name: "An-Naml", ayahs: 93},
+            {name: "Al-Qasas", ayahs: 88},
+            {name: "Al-Ankabut", ayahs: 69},
+            {name: "Ar-Rum", ayahs: 60},
+            {name: "Luqman", ayahs: 34},
+            {name: "As-Sajda", ayahs: 30},
+            {name: "Al-Ahzab", ayahs: 73},
+            {name: "Saba", ayahs: 54},
+            {name: "Fatir", ayahs: 45},
+            {name: "Ya-Sin", ayahs: 83},
+            {name: "As-Saffat", ayahs: 182},
+            {name: "Sad", ayahs: 88},
+            {name: "Az-Zumar", ayahs: 75},
+            {name: "Ghafir", ayahs: 85},
+            {name: "Fussilat", ayahs: 54},
+            {name: "Ash-Shura", ayahs: 53},
+            {name: "Az-Zukhruf", ayahs: 89},
+            {name: "Ad-Dukhan", ayahs: 59},
+            {name: "Al-Jathiyah", ayahs: 37},
+            {name: "Al-Ahqaf", ayahs: 35},
+            {name: "Muhammad", ayahs: 38},
+            {name: "Al-Fath", ayahs: 29},
+            {name: "Al-Hujurat", ayahs: 18},
+            {name: "Qaf", ayahs: 45},
+            {name: "Adh-Dhariyat", ayahs: 60},
+            {name: "At-Tur", ayahs: 49},
+            {name: "An-Najm", ayahs: 62},
+            {name: "Al-Qamar", ayahs: 55},
+            {name: "Ar-Rahman", ayahs: 78},
+            {name: "Al-Waqi'ah", ayahs: 96},
+            {name: "Al-Hadid", ayahs: 29},
+            {name: "Al-Mujadila", ayahs: 22},
+            {name: "Al-Hashr", ayahs: 24},
+            {name: "Al-Mumtahanah", ayahs: 13},
+            {name: "As-Saff", ayahs: 14},
+            {name: "Al-Jumu'ah", ayahs: 11},
+            {name: "Al-Munafiqun", ayahs: 11},
+            {name: "At-Taghabun", ayahs: 18},
+            {name: "At-Talaq", ayahs: 12},
+            {name: "At-Tahrim", ayahs: 12},
+            {name: "Al-Mulk", ayahs: 30},
+            {name: "Al-Qalam", ayahs: 52},
+            {name: "Al-Haqqah", ayahs: 52},
+            {name: "Al-Ma'arij", ayahs: 44},
+            {name: "Nuh", ayahs: 28},
+            {name: "Al-Jinn", ayahs: 28},
+            {name: "Al-Muzzammil", ayahs: 20},
+            {name: "Al-Muddathir", ayahs: 56},
+            {name: "Al-Qiyamah", ayahs: 40},
+            {name: "Al-Insan", ayahs: 31},
+            {name: "Al-Mursalat", ayahs: 50},
+            {name: "An-Naba", ayahs: 40},
+            {name: "An-Nazi'at", ayahs: 46},
+            {name: "Abasa", ayahs: 42},
+            {name: "At-Takwir", ayahs: 29},
+            {name: "Al-Infitar", ayahs: 19},
+            {name: "Al-Mutaffifin", ayahs: 36},
+            {name: "Al-Inshiqaq", ayahs: 25},
+            {name: "Al-Buruj", ayahs: 22},
+            {name: "At-Tariq", ayahs: 17},
+            {name: "Al-A'la", ayahs: 19},
+            {name: "Al-Ghashiyah", ayahs: 26},
+            {name: "Al-Fajr", ayahs: 30},
+            {name: "Al-Balad", ayahs: 20},
+            {name: "Ash-Shams", ayahs: 15},
+            {name: "Al-Lail", ayahs: 21},
+            {name: "Ad-Duha", ayahs: 11},
+            {name: "Ash-Sharh", ayahs: 8},
+            {name: "At-Tin", ayahs: 8},
+            {name: "Al-Alaq", ayahs: 19},
+            {name: "Al-Qadr", ayahs: 5},
+            {name: "Al-Bayyinah", ayahs: 8},
+            {name: "Az-Zalzalah", ayahs: 8},
+            {name: "Al-Adiyat", ayahs: 11},
+            {name: "Al-Qari'ah", ayahs: 11},
+            {name: "At-Takathur", ayahs: 8},
+            {name: "Al-Asr", ayahs: 3},
+            {name: "Al-Humazah", ayahs: 9},
+            {name: "Al-Fil", ayahs: 5},
+            {name: "Quraish", ayahs: 4},
+            {name: "Al-Ma'un", ayahs: 7},
+            {name: "Al-Kawthar", ayahs: 3},
+            {name: "Al-Kafirun", ayahs: 6},
+            {name: "An-Nasr", ayahs: 3},
+            {name: "Al-Masad", ayahs: 5},
+            {name: "Al-Ikhlas", ayahs: 4},
+            {name: "Al-Falaq", ayahs: 5},
+            {name: "An-Nas", ayahs: 6}
+        ];
+
+        // CORS proxy URL for Google Sheets
+        const CORS_PROXY = 'https://corsproxy.io/?';
+        const GOOGLE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQzg3PDECvgQBjL_ss5dUVUrdWNTlmuPGoRO4Ljx7kQ3uQ0R9fzMEn9Gv7IMR99YzhJm84EN-0rdWCD/pub?output=csv';
+
+        // Load data from localStorage on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Populate Surah dropdowns
+            populateSurahDropdowns();
+            
+            // Load all data
+            loadAllData();
+            
+            // Set current date for Quran recitation
+            setCurrentDate();
+            
+            // Initially set connection status to checking
+            setTimeout(() => {
+                checkConnectionStatus();
+            }, 1000);
+        });
+        
+        // Check connection status
+        function checkConnectionStatus() {
+    fetch('/api/sheet-sync', { method: 'HEAD' })
+        .then(response => {
+            updateConnectionStatus(response.ok);
+        })
+        .catch(error => {
+            console.error('Connection error:', error);
+            updateConnectionStatus(false);
+        });
+}
+
+        // Populate Surah dropdowns with color coding for memorized surahs
+        function populateSurahDropdowns() {
+            const currentSurahSelect = document.getElementById('currentSurah');
+            const surahNameSelect = document.getElementById('surahName');
+            
+            // Clear the current options (for when repopulating)
+            currentSurahSelect.innerHTML = '<option value="">Select a Surah</option>';
+            surahNameSelect.innerHTML = '<option value="">Select a Surah</option>';
+            
+            // Get memorized surahs to highlight them
+            const memorizedSurahs = loadFromLocalStorage('memorizedSurahs') || [];
+            const memorizedSurahNames = memorizedSurahs.map(surah => surah.name);
+            
+            quranSurahs.forEach((surah, index) => {
+                const isMemorized = memorizedSurahNames.includes(surah.name);
+                
+                // Current Surah dropdown - Highlight memorized surahs in green
+                const option = document.createElement('option');
+                option.value = surah.name;
+                option.textContent = `${index + 1}. ${surah.name} (${surah.ayahs} ayahs)`;
+                
+                if (isMemorized) {
+                    option.classList.add('memorized-surah');
+                    option.style.backgroundColor = 'rgba(0, 166, 107, 0.2)';
+                    option.style.color = '#006643';
+                    option.style.fontWeight = 'bold';
+                }
+                
+                currentSurahSelect.appendChild(option);
+                
+                // Modal Surah selector - Disable already memorized surahs
+                const option2 = document.createElement('option');
+                option2.value = surah.name;
+                option2.textContent = `${index + 1}. ${surah.name} (${surah.ayahs} ayahs)`;
+                
+                if (isMemorized) {
+                    option2.classList.add('memorized-surah');
+                    option2.style.backgroundColor = 'rgba(0, 166, 107, 0.2)';
+                    option2.style.color = '#006643';
+                    option2.style.fontWeight = 'bold';
+                    option2.disabled = true; // Disable already memorized surahs
+                }
+                
+                surahNameSelect.appendChild(option2);
+            });
+        }
+        
+        // Set current date
+        function setCurrentDate() {
+            const today = new Date();
+            const formattedDate = today.toISOString().split('T')[0];
+            document.getElementById('quranRecitationDate').value = formattedDate;
+        }
+        
+        // Save all data to localStorage
+        function saveToLocalStorage(key, data) {
+            localStorage.setItem(key, JSON.stringify(data));
+        }
+        
+        // Load all data from localStorage
+        function loadFromLocalStorage(key) {
+            const data = localStorage.getItem(key);
+            return data ? JSON.parse(data) : null;
+        }
+        
+        // Master Save function - Saves all data at once
+        function saveAllData() {
+            // Save all data without requiring inputs
+            try {
+                // Religion tab
+                saveRecitationQuietly();
+                saveCurrentSurahProgress();
+                updateCurrentBookQuietly();
+                saveLearningProgressQuietly();
+                saveGoodDeedsQuietly();
+                
+                // Life tab - simplified
+                saveHealthDataQuietly();
+                saveLivingDataQuietly();
+                saveNutritionDataQuietly();
+                saveAppearanceDataQuietly();
+                saveSocialDataQuietly();
+                
+                // Tomorrow tab
+                saveMarriageDataQuietly();
+                saveVehicleDataQuietly();
+                saveFurnishingDataQuietly();
+                saveCareerDataQuietly();
+                
+                // Sync to cloud
+                syncDataToSheet();
+                
+                // Show success animation
+                animateSaveButton();
+                
+                // Show success toast
+                showToast('All data saved successfully!', 'success');
+            } catch (error) {
+                console.error("Error saving data:", error);
+                showToast('Error saving data. Please try again.', 'danger');
+            }
+        }
+        
+        // "Quiet" save functions that don't require validation or show alerts
+        function saveRecitationQuietly() {
+            const date = document.getElementById('quranRecitationDate').value || new Date().toISOString().split('T')[0];
+            const pages = document.getElementById('quranRecitationPages').value || 0;
+            
+            let recitationHistory = loadFromLocalStorage('quranRecitationHistory') || [];
+            const existingIndex = recitationHistory.findIndex(item => item.date === date);
+            
+            if (existingIndex !== -1) {
+                recitationHistory[existingIndex].pages = parseInt(pages);
+            } else {
+                recitationHistory.push({
+                    date: date,
+                    pages: parseInt(pages)
+                });
+            }
+            
+            recitationHistory.sort((a, b) => new Date(b.date) - new Date(a.date));
+            recitationHistory = recitationHistory.slice(0, 10);
+            
+            saveToLocalStorage('quranRecitationHistory', recitationHistory);
+            loadRecitationData();
+        }
+        
+        function updateCurrentBookQuietly() {
+            const bookTitle = document.getElementById('currentBook').value || "Untitled Book";
+            
+            saveToLocalStorage('currentBook', {
+                title: bookTitle,
+                progress: document.getElementById('readingProgress').value || 0,
+                notes: document.getElementById('readingNotes').value || ""
+            });
+        }
+        
+        function saveLearningProgressQuietly() {
+            const focusSelect = document.getElementById('islamicFocus');
+            let focus = focusSelect.value;
+            
+            if (focus === 'custom') {
+                focus = document.getElementById('customIslamicFocus').value || "Custom Study";
+            } else if (!focus) {
+                focus = "General Islamic Studies";
+            }
+            
+            saveToLocalStorage('islamicLearning', {
+                focus: focus,
+                progress: document.getElementById('learningProgress').value || 0,
+                resources: document.getElementById('learningResources').value || ""
+            });
+        }
+        
+        function saveGoodDeedsQuietly() {
+            const date = new Date().toISOString().split('T')[0];
+            
+            const deeds = {
+                date: date,
+                prayers: document.getElementById('deedPrayers').checked,
+                dhikr: document.getElementById('deedDhikr').checked,
+                help: document.getElementById('deedHelp').checked,
+                parents: document.getElementById('deedParents').checked
+            };
+            
+            saveToLocalStorage('goodDeedsToday', deeds);
+        }
+        
+        function saveHealthDataQuietly() {
+            const healthData = {
+                health: document.getElementById('overallHealth').value || 7,
+                goals: document.getElementById('healthGoals').value || ""
+            };
+            
+            saveToLocalStorage('healthData', healthData);
+        }
+        
+        function saveLivingDataQuietly() {
+            const livingData = {
+                cleaning: document.getElementById('cleaningState').value || 5,
+                living: document.getElementById('livingState').value || 5,
+                improvements: document.getElementById('improvementsNeeded').value || "",
+                taskVacuum: document.getElementById('taskVacuum').checked,
+                taskBathroom: document.getElementById('taskBathroom').checked,
+                taskKitchen: document.getElementById('taskKitchen').checked,
+                taskLaundry: document.getElementById('taskLaundry').checked,
+                taskDeclutter: document.getElementById('taskDeclutter').checked
+            };
+            
+            saveToLocalStorage('livingData', livingData);
+        }
+        
+        function saveNutritionDataQuietly() {
+            const nutritionData = {
+                quality: document.getElementById('mealQuality').value || 5
+            };
+            
+            saveToLocalStorage('nutritionData', nutritionData);
+        }
+        
+        function saveAppearanceDataQuietly() {
+            const appearanceData = {
+                wardrobe: document.getElementById('wardrobeState').value || 5,
+                grooming: document.getElementById('grooming').value || 7,
+                needWork: document.getElementById('needWork').checked,
+                needCasual: document.getElementById('needCasual').checked,
+                needSports: document.getElementById('needSports').checked,
+                needShoes: document.getElementById('needShoes').checked,
+                needAccessories: document.getElementById('needAccessories').checked,
+                goals: document.getElementById('appearanceGoals').value || ""
+            };
+            
+            saveToLocalStorage('appearanceData', appearanceData);
+        }
+        
+        function saveSocialDataQuietly() {
+            const socialData = {
+                satisfaction: document.getElementById('socialSatisfaction').value || 5,
+                activityFamily: document.getElementById('activityFamily').checked,
+                activityFriends: document.getElementById('activityFriends').checked,
+                activityCommunity: document.getElementById('activityCommunity').checked,
+                activityMosque: document.getElementById('activityMosque').checked,
+                goals: document.getElementById('socialGoals').value || ""
+            };
+            
+            saveToLocalStorage('socialData', socialData);
+        }
+        
+        function saveMarriageDataQuietly() {
+            const marriageData = {
+                timeline: document.getElementById('marriageTimeline').value || 3,
+                financial: document.getElementById('financialReadiness').value || 0,
+                personal: document.getElementById('personalReadiness').value || 0,
+                housing: document.getElementById('housingReadiness').value || 0,
+                notes: document.getElementById('marriageNotes').value || "",
+                knowledgeRights: document.getElementById('knowledgeRights').checked,
+                knowledgeCommunication: document.getElementById('knowledgeCommunication').checked,
+                knowledgeFamily: document.getElementById('knowledgeFamily').checked
+            };
+            
+            saveToLocalStorage('marriageData', marriageData);
+            
+            // Also save the savings
+            const marriageSavings = {
+                goal: document.getElementById('marriageSavingsGoal').value || 50000,
+                current: document.getElementById('marriageSavingsCurrent').value || 0
+            };
+            
+            saveToLocalStorage('marriageSavings', marriageSavings);
+        }
+        
+        function saveVehicleDataQuietly() {
+            const vehicleData = {
+                timeline: document.getElementById('vehicleTimeline').value || 2,
+                researchModels: document.getElementById('researchModels').checked,
+                researchCosts: document.getElementById('researchCosts').checked,
+                researchFinancing: document.getElementById('researchFinancing').checked,
+                researchInsurance: document.getElementById('researchInsurance').checked,
+                notes: document.getElementById('vehicleNotes').value || ""
+            };
+            
+            saveToLocalStorage('vehicleData', vehicleData);
+            
+            // Also save the savings
+            const vehicleSavings = {
+                goal: document.getElementById('vehicleSavingsGoal').value || 40000,
+                current: document.getElementById('vehicleSavingsCurrent').value || 0
+            };
+            
+            saveToLocalStorage('vehicleSavings', vehicleSavings);
+        }
+        
+        function saveFurnishingDataQuietly() {
+            const furnishingData = {
+                timeline: document.getElementById('furnishingTimeline').value || 1,
+                livingRoom: document.getElementById('livingRoomProgress').value || 0,
+                bedroom: document.getElementById('bedroomProgress').value || 0,
+                kitchen: document.getElementById('kitchenProgress').value || 0,
+                bathroom: document.getElementById('bathroomProgress').value || 0,
+                notes: document.getElementById('furnishingNotes').value || ""
+            };
+            
+            saveToLocalStorage('furnishingData', furnishingData);
+            
+            // Also save the budget
+            const furnishingBudget = {
+                goal: document.getElementById('furnishingBudgetGoal').value || 30000,
+                current: document.getElementById('furnishingBudgetCurrent').value || 0
+            };
+            
+            saveToLocalStorage('furnishingBudget', furnishingBudget);
+        }
+        
+        function saveCareerDataQuietly() {
+            const careerData = {
+                shortTerm: document.getElementById('careerShortTerm').value || "",
+                midTerm: document.getElementById('careerMidTerm').value || "",
+                longTerm: document.getElementById('careerLongTerm').value || "",
+                currentSkill: document.getElementById('currentSkill').value || "",
+                skillProgress: document.getElementById('skillProgress').value || 0,
+                currentSalary: document.getElementById('currentSalary').value || 5200,
+                targetSalary: document.getElementById('targetSalary').value || 8000
+            };
+            
+            saveToLocalStorage('careerData', careerData);
+        }
+        
+        // Google Sheets sync functions
+        function syncDataToSheet() {
+    const status = document.getElementById('syncStatus');
+    status.textContent = 'Saving to cloud...';
+    status.className = 'sync-status text-primary';
+    
+    // Get all data from localStorage
+    const allData = {};
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        allData[key] = loadFromLocalStorage(key);
+    }
+    
+    // Call your Netlify function
+    fetch('/api/sheet-sync', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            dataType: 'allData',
+            userId: 'default-user', // You could add user identification later
+            data: allData
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        // Update connection status to connected
+        updateConnectionStatus(true);
+        
+        status.textContent = 'Data saved to cloud!';
+        status.className = 'sync-status text-success';
+        
+        setTimeout(() => {
+            status.textContent = '';
+        }, 3000);
+        
+        showToast('Data successfully synced to cloud!', 'success');
+    })
+    .catch(error => {
+        console.error('Error syncing data:', error);
+        
+        // Update connection status to disconnected
+        updateConnectionStatus(false);
+        
+        status.textContent = 'Cloud sync failed';
+        status.className = 'sync-status text-danger';
+        
+        setTimeout(() => {
+            status.textContent = '';
+        }, 3000);
+        
+        showToast('Failed to sync data. Please try again.', 'danger');
+    });
+}
+
+function syncDataFromSheet() {
+    const status = document.getElementById('syncStatus');
+    status.textContent = 'Loading data from cloud...';
+    status.className = 'sync-status text-primary';
+    
+    fetch('/api/sheet-sync')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Update connection status
+            updateConnectionStatus(true);
+            
+            // Find the latest data entry
+            const latestEntry = data.sort((a, b) => 
+                new Date(b.timestamp) - new Date(a.timestamp)
+            )[0];
+            
+            if (latestEntry && latestEntry.data) {
+                // Parse the stored JSON data
+                const appData = JSON.parse(latestEntry.data);
+                
+                // Update all localStorage items
+                Object.keys(appData).forEach(key => {
+                    saveToLocalStorage(key, appData[key]);
+                });
+                
+                status.textContent = 'Data loaded from cloud!';
+                status.className = 'sync-status text-success';
+                
+                setTimeout(() => {
+                    status.textContent = '';
+                    loadAllData(); // Reload all data from localStorage
+                }, 3000);
+                
+                showToast('Data successfully synced from cloud!', 'success');
+            } else {
+                status.textContent = 'No data found in cloud';
+                status.className = 'sync-status text-warning';
+                
+                setTimeout(() => {
+                    status.textContent = '';
+                }, 3000);
+                
+                showToast('No previous data found in cloud storage', 'info');
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching data:', error);
+            
+            // Update connection status
+            updateConnectionStatus(false);
+            
+            status.textContent = 'Error loading data';
+            status.className = 'sync-status text-danger';
+            
+            setTimeout(() => {
+                status.textContent = '';
+            }, 3000);
+            
+            showToast('Failed to load data from cloud. Please try again.', 'danger');
+        });
+}
+
+// Replace your existing syncDataFromSheet function similarly:
+function syncDataFromSheet() {
+    const status = document.getElementById('syncStatus');
+    status.textContent = 'Loading data from cloud...';
+    status.className = 'sync-status text-primary';
+    
+    fetch('/api/sheet-sync')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Update connection status
+            updateConnectionStatus(true);
+            
+            // Find the latest data entry
+            const latestEntry = data.sort((a, b) => 
+                new Date(b.timestamp) - new Date(a.timestamp)
+            )[0];
+            
+            if (latestEntry && latestEntry.data) {
+                // Parse the stored JSON data
+                const appData = JSON.parse(latestEntry.data);
+                
+                // Update all localStorage items
+                Object.keys(appData).forEach(key => {
+                    saveToLocalStorage(key, appData[key]);
+                });
+                
+                status.textContent = 'Data loaded from cloud!';
+                status.className = 'sync-status text-success';
+                
+                setTimeout(() => {
+                    status.textContent = '';
+                    loadAllData(); // Reload all data from localStorage
+                }, 3000);
+                
+                showToast('Data successfully synced from cloud!', 'success');
+            } else {
+                status.textContent = 'No data found in cloud';
+                status.className = 'sync-status text-warning';
+                
+                setTimeout(() => {
+                    status.textContent = '';
+                }, 3000);
+                
+                showToast('No previous data found in cloud storage', 'info');
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching data:', error);
+            
+            // Update connection status
+            updateConnectionStatus(false);
+            
+            status.textContent = 'Error loading data';
+            status.className = 'sync-status text-danger';
+            
+            setTimeout(() => {
+                status.textContent = '';
+            }, 3000);
+            
+            showToast('Failed to load data from cloud. Please try again.', 'danger');
+        });
+}
+        function syncDataFromSheet() {
+            const status = document.getElementById('syncStatus');
+            status.textContent = 'Loading data from cloud...';
+            status.className = 'sync-status text-primary';
+            
+            // Check if connected
+            if (!connectionStatus) {
+                status.textContent = 'Cannot sync: Disconnected';
+                status.className = 'sync-status text-danger';
+                
+                setTimeout(() => {
+                    status.textContent = '';
+                }, 3000);
+                
+                showToast('Cloud sync failed. Please check your connection.', 'warning');
+                return;
+            }
+            
+            // Fetch data from Google Sheet via CORS proxy
+            fetch(CORS_PROXY + encodeURIComponent(GOOGLE_SHEET_URL))
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.text();
+                })
+                .then(csv => {
+                    // Process the CSV data (this is simplified)
+                    status.textContent = 'Data loaded from cloud!';
+                    status.className = 'sync-status text-success';
+                    
+                    setTimeout(() => {
+                        status.textContent = '';
+                        loadAllData(); // Reload all data from localStorage
+                        showToast('Data successfully synced from cloud!', 'success');
+                    }, 3000);
+                })
+                .catch(error => {
+                    console.error('Error fetching data:', error);
+                    status.textContent = 'Error loading data';
+                    status.className = 'sync-status text-danger';
+                    
+                    setTimeout(() => {
+                        status.textContent = '';
+                    }, 3000);
+                    
+                    showToast('Failed to load data from cloud. Please try again.', 'danger');
+                });
+        }
+        
+        // Load all app data
+        function loadAllData() {
+            // Religion tab data
+            loadRecitationData();
+            loadMemorizationData();
+            loadReadingData();
+            loadLearningData();
+            loadGoodDeedsData();
+            
+            // Life tab data - simplified
+            loadHealthData();
+            loadLivingData();
+            loadNutritionData();
+            loadAppearanceData();
+            loadSocialData();
+            
+            // Tomorrow tab data
+            loadMarriageData();
+            loadVehicleData();
+            loadFurnishingData();
+            loadCareerData();
+        }
+        
+        //
+        // Religion Tab Functions
+        //
+        
+        // Quran Recitation Functions
+        function updateRecitationValue(value) {
+            document.getElementById('quranRecitationValue').textContent = value;
+            const percentage = (value / 10) * 100;
+            document.getElementById('quranRecitationProgress').style.width = percentage + '%';
+            document.getElementById('quranRecitationProgress').textContent = percentage + '%';
+        }
+        
+        function saveRecitation() {
+            const date = document.getElementById('quranRecitationDate').value;
+            const pages = document.getElementById('quranRecitationPages').value;
+            
+            if (!date) {
+                showToast('Please select a date', 'warning');
+                return;
+            }
+            
+            // Get existing recitation history or create new array
+            let recitationHistory = loadFromLocalStorage('quranRecitationHistory') || [];
+            
+            // Check if entry for this date already exists
+            const existingIndex = recitationHistory.findIndex(item => item.date === date);
+            
+            if (existingIndex !== -1) {
+                // Update existing entry
+                recitationHistory[existingIndex].pages = parseInt(pages);
+            } else {
+                // Add new entry
+                recitationHistory.push({
+                    date: date,
+                    pages: parseInt(pages)
+                });
+            }
+            
+            // Sort by date (newest first)
+            recitationHistory.sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            // Limit to last 10 entries
+            recitationHistory = recitationHistory.slice(0, 10);
+            
+            // Save to localStorage
+            saveToLocalStorage('quranRecitationHistory', recitationHistory);
+            
+            // Update the display
+            loadRecitationData();
+            
+            showToast('Recitation saved successfully!', 'success');
+        }
+        
+        function loadRecitationData() {
+            const recitationHistory = loadFromLocalStorage('quranRecitationHistory') || [];
+            const historyList = document.getElementById('recitationHistoryList');
+            historyList.innerHTML = '';
+            
+            if (recitationHistory.length === 0) {
+                historyList.innerHTML = '<li class="list-group-item">No recitation history yet</li>';
+                return;
+            }
+            
+            recitationHistory.forEach(item => {
+                const li = document.createElement('li');
+                li.className = 'list-group-item d-flex justify-content-between align-items-center';
+                li.innerHTML = `
+                    <span>${new Date(item.date).toLocaleDateString()}</span>
+                    <span>${item.pages} pages</span>
+                `;
+                historyList.appendChild(li);
+            });
+        }
+        
+        // Quran Memorization Functions
+        function updateMemorizeValue(value) {
+            document.getElementById('memorizeProgressValue').textContent = value;
+            document.getElementById('memorizeProgressBar').style.width = value + '%';
+            document.getElementById('memorizeProgressBar').textContent = value + '%';
+            
+            // Also update the current surah progress in memory
+            saveCurrentSurahProgress();
+        }
+        
+        function updateCurrentSurah() {
+            const surahName = document.getElementById('currentSurah').value;
+            
+            if (!surahName) {
+                showToast('Please select a surah', 'warning');
+                return;
+            }
+            
+            // Load existing progress for this surah if any
+            const memorizeData = loadFromLocalStorage('memorizeData') || {};
+            const progress = memorizeData[surahName] || 0;
+            
+            // Update the progress slider
+            document.getElementById('memorizeProgress').value = progress;
+            updateMemorizeValue(progress);
+            
+            // Save current surah to localStorage
+            saveToLocalStorage('currentMemorizationSurah', surahName);
+            
+            showToast('Current memorization surah updated!', 'success');
+        }
+        
+        function addMemorizedSurah() {
+            const surahName = document.getElementById('surahName').value;
+            const date = document.getElementById('memorizationDate').value;
+            
+            if (!surahName || !date) {
+                showToast('Please select a surah and date', 'warning');
+                return;
+            }
+            
+            // Find ayah count from our data
+            const surah = quranSurahs.find(s => s.name === surahName);
+            if (!surah) {
+                showToast('Invalid surah selected', 'danger');
+                return;
+            }
+            
+            // Get existing memorized surahs or create new array
+            const memorizedSurahs = loadFromLocalStorage('memorizedSurahs') || [];
+            
+            // Check if this surah is already memorized
+            if (memorizedSurahs.some(s => s.name === surahName)) {
+                showToast('This surah is already in your memorized list', 'info');
+                return;
+            }
+            
+            // Add new surah
+            memorizedSurahs.push({
+                name: surahName,
+                ayahs: surah.ayahs,
+                date: date
+            });
+            
+            // Save to localStorage
+            saveToLocalStorage('memorizedSurahs', memorizedSurahs);
+            
+            // Update memorization data to mark as 100% complete
+            const memorizeData = loadFromLocalStorage('memorizeData') || {};
+            memorizeData[surahName] = 100;
+            saveToLocalStorage('memorizeData', memorizeData);
+            
+            // Update the display
+            loadMemorizationData();
+            
+            // Close the modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('addSurahModal'));
+            modal.hide();
+            
+            // Clear form
+            document.getElementById('surahName').value = '';
+            document.getElementById('memorizationDate').value = '';
+            
+            // Refresh the dropdown to show the newly memorized surah
+            document.getElementById('currentSurah').innerHTML = '';
+            document.getElementById('surahName').innerHTML = '';
+            populateSurahDropdowns();
+            
+            showToast('Surah added successfully!', 'success');
+        }
+        
+        function loadMemorizationData() {
+            // Load current surah
+            const currentSurah = loadFromLocalStorage('currentMemorizationSurah');
+            if (currentSurah) {
+                document.getElementById('currentSurah').value = currentSurah;
+                
+                // Load progress for current surah
+                const memorizeData = loadFromLocalStorage('memorizeData') || {};
+                const progress = memorizeData[currentSurah] || 0;
+                document.getElementById('memorizeProgress').value = progress;
+                updateMemorizeValue(progress);
+            }
+            
+            // Load memorized surahs
+            const memorizedSurahs = loadFromLocalStorage('memorizedSurahs') || [];
+            const memorizationList = document.getElementById('quranMemorizationList');
+            memorizationList.innerHTML = '';
+            
+            if (memorizedSurahs.length === 0) {
+                memorizationList.innerHTML = '<li class="list-group-item">No memorized surahs yet</li>';
+                return;
+            }
+            
+            memorizedSurahs.forEach((surah, index) => {
+                const li = document.createElement('li');
+                li.className = 'list-group-item';
+                li.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>${surah.name} (${surah.ayahs} ayahs)</span>
+                        <div>
+                            <small class="text-muted me-3">${new Date(surah.date).toLocaleDateString()}</small>
+                            <button class="btn btn-sm btn-outline-danger" onclick="removeSurah(${index})">Remove</button>
+                        </div>
+                    </div>
+                `;
+                memorizationList.appendChild(li);
+            });
+            
+            // Update overall memorization progress
+            updateOverallMemorization();
+        }
+        
+        function removeSurah(index) {
+            if (confirm('Are you sure you want to remove this surah?')) {
+                const memorizedSurahs = loadFromLocalStorage('memorizedSurahs') || [];
+                
+                // Get the surah name before removing it
+                const surahName = memorizedSurahs[index].name;
+                
+                // Remove from memorized list
+                memorizedSurahs.splice(index, 1);
+                saveToLocalStorage('memorizedSurahs', memorizedSurahs);
+                
+                // Update the memorization data
+                const memorizeData = loadFromLocalStorage('memorizeData') || {};
+                if (memorizeData[surahName]) {
+                    // Reset to 0 progress instead of removing completely
+                    memorizeData[surahName] = 0;
+                    saveToLocalStorage('memorizeData', memorizeData);
+                }
+                
+                // Refresh the dropdown to reflect the change
+                document.getElementById('currentSurah').innerHTML = '';
+                document.getElementById('surahName').innerHTML = '';
+                populateSurahDropdowns();
+                
+                loadMemorizationData();
+                
+                showToast('Surah removed successfully', 'info');
+            }
+        }
+        
+        function saveCurrentSurahProgress() {
+            const surahName = document.getElementById('currentSurah').value;
+            const progress = document.getElementById('memorizeProgress').value;
+            
+            if (!surahName) {
+                return; // Silent return for batch save
+            }
+            
+            const memorizeData = loadFromLocalStorage('memorizeData') || {};
+            memorizeData[surahName] = progress;
+            
+            saveToLocalStorage('memorizeData', memorizeData);
+            
+            // Update overall progress
+            updateOverallMemorization();
+        }
+        
+        function updateOverallMemorization() {
+            const memorizedSurahs = loadFromLocalStorage('memorizedSurahs') || [];
+            const memorizeData = loadFromLocalStorage('memorizeData') || {};
+            
+            // Count total ayahs in Quran
+            const totalAyahs = quranSurahs.reduce((sum, surah) => sum + surah.ayahs, 0);
+            
+            // Count completely memorized ayahs
+            let memorizedAyahs = memorizedSurahs.reduce((sum, surah) => sum + surah.ayahs, 0);
+            
+            // Add partially memorized ayahs
+            quranSurahs.forEach(surah => {
+                if (memorizeData[surah.name] && memorizeData[surah.name] > 0 && 
+                    !memorizedSurahs.some(s => s.name === surah.name)) {
+                    memorizedAyahs += (surah.ayahs * memorizeData[surah.name] / 100);
+                }
+            });
+            
+            // Calculate percentage
+            const percentage = Math.round((memorizedAyahs / totalAyahs) * 100);
+            
+            // Update progress bar
+            document.getElementById('overallMemorizationProgress').style.width = percentage + '%';
+            document.getElementById('overallMemorizationProgress').textContent = 
+                `${percentage}% (${Math.round(memorizedAyahs)}/${totalAyahs} ayahs)`;
+        }
+        
+        // Islamic Reading Functions
+        function updateReadingValue(value) {
+            document.getElementById('readingProgressValue').textContent = value;
+            document.getElementById('readingProgressBar').style.width = value + '%';
+            document.getElementById('readingProgressBar').textContent = value + '%';
+        }
+        
+        function updateCurrentBook() {
+            const bookTitle = document.getElementById('currentBook').value;
+            
+            if (!bookTitle) {
+                showToast('Please enter a book title', 'warning');
+                return;
+            }
+            
+            // Save to localStorage
+            saveToLocalStorage('currentBook', {
+                title: bookTitle,
+                progress: document.getElementById('readingProgress').value,
+                notes: document.getElementById('readingNotes').value
+            });
+            
+            showToast('Current book updated!', 'success');
+        }
+        
+        function loadReadingData() {
+            // Load current book
+            const currentBook = loadFromLocalStorage('currentBook');
+            if (currentBook) {
+                document.getElementById('currentBook').value = currentBook.title;
+                document.getElementById('readingProgress').value = currentBook.progress;
+                document.getElementById('readingNotes').value = currentBook.notes;
+                updateReadingValue(currentBook.progress);
+            }
+            
+            // Load completed books
+            const completedBooks = loadFromLocalStorage('completedBooks') || [];
+            const completedBooksList = document.getElementById('completedBooksList');
+            completedBooksList.innerHTML = '';
+            
+            if (completedBooks.length === 0) {
+                completedBooksList.innerHTML = '<li class="list-group-item">No completed books yet</li>';
+                return;
+            }
+            
+            completedBooks.forEach((book, index) => {
+                const li = document.createElement('li');
+                li.className = 'list-group-item d-flex justify-content-between align-items-center';
+                li.innerHTML = `
+                    <span>${book.title}</span>
+                    <small class="text-muted">${new Date(book.completionDate).toLocaleDateString()}</small>
+                `;
+                completedBooksList.appendChild(li);
+            });
+        }
+        
+        // Islamic Learning Functions
+        function updateLearningValue(value) {
+            document.getElementById('learningProgressValue').textContent = value;
+            document.getElementById('learningProgressBar').style.width = value + '%';
+            document.getElementById('learningProgressBar').textContent = value + '%';
+        }
+        
+        function saveLearningProgress() {
+            const focusSelect = document.getElementById('islamicFocus');
+            let focus = focusSelect.value;
+            
+            if (focus === 'custom') {
+                focus = document.getElementById('customIslamicFocus').value;
+                if (!focus) {
+                    showToast('Please specify your custom focus area', 'warning');
+                    return;
+                }
+            } else if (!focus) {
+                showToast('Please select a focus area', 'warning');
+                return;
+            }
+            
+            const progress = document.getElementById('learningProgress').value;
+            const resources = document.getElementById('learningResources').value;
+            
+            // Save to localStorage
+            saveToLocalStorage('islamicLearning', {
+                focus: focus,
+                progress: progress,
+                resources: resources
+            });
+            
+            showToast('Learning progress saved!', 'success');
+        }
+        
+        function loadLearningData() {
+            const learningData = loadFromLocalStorage('islamicLearning');
+            if (!learningData) return;
+            
+            const focusSelect = document.getElementById('islamicFocus');
+            const customFocusInput = document.getElementById('customIslamicFocus');
+            
+            if (focusSelect.querySelector(`option[value="${learningData.focus}"]`)) {
+                focusSelect.value = learningData.focus;
+                customFocusInput.classList.add('d-none');
+            } else {
+                focusSelect.value = 'custom';
+                customFocusInput.classList.remove('d-none');
+                customFocusInput.value = learningData.focus;
+            }
+            
+            document.getElementById('learningProgress').value = learningData.progress;
+            document.getElementById('learningResources').value = learningData.resources;
+            updateLearningValue(learningData.progress);
+        }
+        
+        // Show/hide custom focus input when dropdown changes
+        document.getElementById('islamicFocus').addEventListener('change', function() {
+            const customFocusInput = document.getElementById('customIslamicFocus');
+            if (this.value === 'custom') {
+                customFocusInput.classList.remove('d-none');
+            } else {
+                customFocusInput.classList.add('d-none');
+            }
+        });
+        
+        // Good Deeds Functions
+        function updateUmrahValue(value) {
+            document.getElementById('umrahSavingsValue').textContent = value;
+            document.getElementById('umrahProgressBar').style.width = value + '%';
+            document.getElementById('umrahProgressBar').textContent = value + '%';
+        }
+        
+        function addCharity() {
+            const amount = document.getElementById('charityAmount').value;
+            
+            if (!amount || isNaN(amount) || amount <= 0) {
+                showToast('Please enter a valid amount', 'warning');
+                return;
+            }
+            
+            // Get current month and year
+            const now = new Date();
+            const monthKey = `${now.getFullYear()}-${now.getMonth() + 1}`;
+            
+            // Get existing charity data or create new
+            const charityData = loadFromLocalStorage('charityData') || {};
+            
+            // Add to month total
+            if (!charityData[monthKey]) {
+                charityData[monthKey] = 0;
+            }
+            charityData[monthKey] += parseFloat(amount);
+            
+            // Save to localStorage
+            saveToLocalStorage('charityData', charityData);
+            
+            // Update display
+            updateCharityDisplay();
+            
+            // Clear input
+            document.getElementById('charityAmount').value = '';
+            
+            showToast('Charity amount added!', 'success');
+        }
+        
+        function updateCharityDisplay() {
+            const charityGoal = document.getElementById('charityGoal').textContent;
+            
+            // Get current month and year
+            const now = new Date();
+            const monthKey = `${now.getFullYear()}-${now.getMonth() + 1}`;
+            
+            // Get charity data
+            const charityData = loadFromLocalStorage('charityData') || {};
+            const monthTotal = charityData[monthKey] || 0;
+            
+            // Update display
+            document.getElementById('charityTotal').textContent = monthTotal.toFixed(2);
+            
+            // Update progress bar
+            const percentage = Math.min(100, Math.round((monthTotal / parseFloat(charityGoal)) * 100));
+            document.getElementById('charityProgress').style.width = percentage + '%';
+            document.getElementById('charityProgress').textContent = percentage + '%';
+        }
+        
+        function addCustomDeed() {
+            const customDeed = document.getElementById('customDeed').value;
+            
+            if (!customDeed) {
+                showToast('Please enter a deed', 'warning');
+                return;
+            }
+            
+            // Get existing custom deeds or create new array
+            const customDeeds = loadFromLocalStorage('customDeeds') || [];
+            
+            // Add new deed
+            customDeeds.push(customDeed);
+            
+            // Save to localStorage
+            saveToLocalStorage('customDeeds', customDeeds);
+            
+            // Update display
+            loadGoodDeedsData();
+            
+            // Clear input
+            document.getElementById('customDeed').value = '';
+            
+            showToast('Custom deed added!', 'success');
+        }
+        
+        function saveGoodDeeds() {
+            const date = new Date().toISOString().split('T')[0];
+            
+            const deeds = {
+                date: date,
+                prayers: document.getElementById('deedPrayers').checked,
+                dhikr: document.getElementById('deedDhikr').checked,
+                help: document.getElementById('deedHelp').checked,
+                parents: document.getElementById('deedParents').checked
+            };
+            
+            // Save to localStorage
+            saveToLocalStorage('goodDeedsToday', deeds);
+            
+            showToast('Good deeds saved for today!', 'success');
+        }
+        
+        function loadGoodDeedsData() {
+            // Load charity data
+            updateCharityDisplay();
+            
+            // Load umrah data
+            const umrahData = loadFromLocalStorage('umrahData');
+            if (umrahData) {
+                document.getElementById('umrahDate').value = umrahData.date;
+                document.getElementById('umrahSavings').value = umrahData.savings;
+                updateUmrahValue(umrahData.savings);
+            }
+            
+            // Load good deeds for today
+            const goodDeedsToday = loadFromLocalStorage('goodDeedsToday');
+            if (goodDeedsToday && goodDeedsToday.date === new Date().toISOString().split('T')[0]) {
+                document.getElementById('deedPrayers').checked = goodDeedsToday.prayers;
+                document.getElementById('deedDhikr').checked = goodDeedsToday.dhikr;
+                document.getElementById('deedHelp').checked = goodDeedsToday.help;
+                document.getElementById('deedParents').checked = goodDeedsToday.parents;
+            } else {
+                document.getElementById('deedPrayers').checked = false;
+                document.getElementById('deedDhikr').checked = false;
+                document.getElementById('deedHelp').checked = false;
+                document.getElementById('deedParents').checked = false;
+            }
+            
+            // Load custom deeds
+            const customDeeds = loadFromLocalStorage('customDeeds') || [];
+            const customDeedsList = document.getElementById('customDeedsList');
+            customDeedsList.innerHTML = '';
+            
+            customDeeds.forEach((deed, index) => {
+                const div = document.createElement('div');
+                div.className = 'mb-3 form-check';
+                div.innerHTML = `
+                    <input type="checkbox" class="form-check-input" id="customDeed${index}">
+                    <label class="form-check-label" for="customDeed${index}">${deed}</label>
+                    <button class="btn btn-sm btn-outline-danger float-end" onclick="removeCustomDeed(${index})">
+                        <i class="bi bi-x"></i>
+                    </button>
+                `;
+                customDeedsList.appendChild(div);
+            });
+        }
+        
+        function removeCustomDeed(index) {
+            if (confirm('Are you sure you want to remove this deed?')) {
+                const customDeeds = loadFromLocalStorage('customDeeds') || [];
+                customDeeds.splice(index, 1);
+                saveToLocalStorage('customDeeds', customDeeds);
+                loadGoodDeedsData();
+                showToast('Custom deed removed', 'info');
+            }
+        }
+        
+        //
+        // Life Tab Functions
+        //
+        
+        // Health Functions
+        function updateHealthValue(value) {
+            document.getElementById('healthValue').textContent = value;
+            const percentage = (value / 10) * 100;
+            document.getElementById('healthProgress').style.width = percentage + '%';
+            document.getElementById('healthProgress').textContent = percentage + '%';
+        }
+        
+        function saveHealthData() {
+            const healthData = {
+                health: document.getElementById('overallHealth').value,
+                goals: document.getElementById('healthGoals').value
+            };
+            
+            // Save to localStorage
+            saveToLocalStorage('healthData', healthData);
+            
+            showToast('Health data saved!', 'success');
+        }
+        
+        function loadHealthData() {
+            const healthData = loadFromLocalStorage('healthData');
+            if (!healthData) return;
+            
+            document.getElementById('overallHealth').value = healthData.health;
+            document.getElementById('healthGoals').value = healthData.goals;
+            
+            updateHealthValue(healthData.health);
+        }
+        
+        // Living Environment Functions
+        function updateCleaningValue(value) {
+            document.getElementById('cleaningValue').textContent = value;
+            const percentage = (value / 10) * 100;
+            document.getElementById('cleaningProgress').style.width = percentage + '%';
+            document.getElementById('cleaningProgress').textContent = percentage + '%';
+        }
+        
+        function updateLivingValue(value) {
+            document.getElementById('livingValue').textContent = value;
+            const percentage = (value / 10) * 100;
+            document.getElementById('livingProgress').style.width = percentage + '%';
+            document.getElementById('livingProgress').textContent = percentage + '%';
+        }
+        
+        function saveLivingData() {
+            const livingData = {
+                cleaning: document.getElementById('cleaningState').value,
+                living: document.getElementById('livingState').value,
+                improvements: document.getElementById('improvementsNeeded').value,
+                taskVacuum: document.getElementById('taskVacuum').checked,
+                taskBathroom: document.getElementById('taskBathroom').checked,
+                taskKitchen: document.getElementById('taskKitchen').checked,
+                taskLaundry: document.getElementById('taskLaundry').checked,
+                taskDeclutter: document.getElementById('taskDeclutter').checked
+            };
+            
+            // Save to localStorage
+            saveToLocalStorage('livingData', livingData);
+            
+            showToast('Living environment data saved!', 'success');
+        }
+        
+        function loadLivingData() {
+            const livingData = loadFromLocalStorage('livingData');
+            if (!livingData) return;
+            
+            document.getElementById('cleaningState').value = livingData.cleaning;
+            document.getElementById('livingState').value = livingData.living;
+            document.getElementById('improvementsNeeded').value = livingData.improvements;
+            
+            updateCleaningValue(livingData.cleaning);
+            updateLivingValue(livingData.living);
+            
+            // Load cleaning tasks
+            document.getElementById('taskVacuum').checked = livingData.taskVacuum;
+            document.getElementById('taskBathroom').checked = livingData.taskBathroom;
+            document.getElementById('taskKitchen').checked = livingData.taskKitchen;
+            document.getElementById('taskLaundry').checked = livingData.taskLaundry;
+            document.getElementById('taskDeclutter').checked = livingData.taskDeclutter;
+        }
+        
+        // Nutrition Functions
+        function updateMealValue(value) {
+            document.getElementById('mealValue').textContent = value;
+            const percentage = (value / 10) * 100;
+            document.getElementById('mealProgress').style.width = percentage + '%';
+            document.getElementById('mealProgress').textContent = percentage + '%';
+        }
+        
+        function saveNutritionData() {
+            const nutritionData = {
+                quality: document.getElementById('mealQuality').value
+            };
+            
+            // Save to localStorage
+            saveToLocalStorage('nutritionData', nutritionData);
+            
+            showToast('Nutrition data saved!', 'success');
+        }
+        
+        function loadNutritionData() {
+            const nutritionData = loadFromLocalStorage('nutritionData');
+            if (!nutritionData) return;
+            
+            document.getElementById('mealQuality').value = nutritionData.quality;
+            updateMealValue(nutritionData.quality);
+        }
+        
+        // Appearance Functions
+        function updateWardrobeValue(value) {
+            document.getElementById('wardrobeValue').textContent = value;
+            const percentage = (value / 10) * 100;
+            document.getElementById('wardrobeProgress').style.width = percentage + '%';
+            document.getElementById('wardrobeProgress').textContent = percentage + '%';
+        }
+        
+        function updateGroomingValue(value) {
+            document.getElementById('groomingValue').textContent = value;
+            const percentage = (value / 10) * 100;
+            document.getElementById('groomingProgress').style.width = percentage + '%';
+            document.getElementById('groomingProgress').textContent = percentage + '%';
+        }
+        
+        function saveAppearanceData() {
+            const appearanceData = {
+                wardrobe: document.getElementById('wardrobeState').value,
+                grooming: document.getElementById('grooming').value,
+                needWork: document.getElementById('needWork').checked,
+                needCasual: document.getElementById('needCasual').checked,
+                needSports: document.getElementById('needSports').checked,
+                needShoes: document.getElementById('needShoes').checked,
+                needAccessories: document.getElementById('needAccessories').checked,
+                goals: document.getElementById('appearanceGoals').value
+            };
+            
+            // Save to localStorage
+            saveToLocalStorage('appearanceData', appearanceData);
+            
+            showToast('Appearance data saved!', 'success');
+        }
+        
+        function loadAppearanceData() {
+            const appearanceData = loadFromLocalStorage('appearanceData');
+            if (!appearanceData) return;
+            
+            document.getElementById('wardrobeState').value = appearanceData.wardrobe;
+            document.getElementById('grooming').value = appearanceData.grooming;
+            document.getElementById('needWork').checked = appearanceData.needWork;
+            document.getElementById('needCasual').checked = appearanceData.needCasual;
+            document.getElementById('needSports').checked = appearanceData.needSports;
+            document.getElementById('needShoes').checked = appearanceData.needShoes;
+            document.getElementById('needAccessories').checked = appearanceData.needAccessories;
+            document.getElementById('appearanceGoals').value = appearanceData.goals;
+            
+            updateWardrobeValue(appearanceData.wardrobe);
+            updateGroomingValue(appearanceData.grooming);
+        }
+        
+        // Social Functions
+        function updateSocialValue(value) {
+            document.getElementById('socialValue').textContent = value;
+            const percentage = (value / 10) * 100;
+            document.getElementById('socialProgress').style.width = percentage + '%';
+            document.getElementById('socialProgress').textContent = percentage + '%';
+        }
+        
+        function saveSocialData() {
+            const socialData = {
+                satisfaction: document.getElementById('socialSatisfaction').value,
+                activityFamily: document.getElementById('activityFamily').checked,
+                activityFriends: document.getElementById('activityFriends').checked,
+                activityCommunity: document.getElementById('activityCommunity').checked,
+                activityMosque: document.getElementById('activityMosque').checked,
+                goals: document.getElementById('socialGoals').value
+            };
+            
+            // Save to localStorage
+            saveToLocalStorage('socialData', socialData);
+            
+            showToast('Social data saved!', 'success');
+        }
+        
+        function loadSocialData() {
+            const socialData = loadFromLocalStorage('socialData');
+            if (!socialData) return;
+            
+            document.getElementById('socialSatisfaction').value = socialData.satisfaction;
+            document.getElementById('activityFamily').checked = socialData.activityFamily;
+            document.getElementById('activityFriends').checked = socialData.activityFriends;
+            document.getElementById('activityCommunity').checked = socialData.activityCommunity;
+            document.getElementById('activityMosque').checked = socialData.activityMosque;
+            document.getElementById('socialGoals').value = socialData.goals;
+            
+            updateSocialValue(socialData.satisfaction);
+        }
+        
+        //
+        // Tomorrow Tab Functions
+        //
+        
+        // Marriage Functions
+        function updateMarriageTimelineValue(value) {
+            document.getElementById('marriageTimelineValue').textContent = value;
+        }
+        
+        function updateFinancialReadinessValue(value) {
+            document.getElementById('financialReadinessValue').textContent = value;
+            document.getElementById('financialReadinessProgress').style.width = value + '%';
+            document.getElementById('financialReadinessProgress').textContent = value + '%';
+        }
+        
+        function updatePersonalReadinessValue(value) {
+            document.getElementById('personalReadinessValue').textContent = value;
+            document.getElementById('personalReadinessProgress').style.width = value + '%';
+            document.getElementById('personalReadinessProgress').textContent = value + '%';
+        }
+        
+        function updateHousingReadinessValue(value) {
+            document.getElementById('housingReadinessValue').textContent = value;
+            document.getElementById('housingReadinessProgress').style.width = value + '%';
+            document.getElementById('housingReadinessProgress').textContent = value + '%';
+        }
+        
+        function updateMarriageSavings() {
+            const goal = document.getElementById('marriageSavingsGoal').value;
+            const current = document.getElementById('marriageSavingsCurrent').value;
+            
+            if (!goal || !current || isNaN(goal) || isNaN(current)) {
+                showToast('Please enter valid amounts', 'warning');
+                return;
+            }
+            
+            // Calculate percentage
+            const percentage = Math.min(100, Math.round((current / goal) * 100));
+            
+            // Update progress bar
+            document.getElementById('marriageSavingsProgress').style.width = percentage + '%';
+            document.getElementById('marriageSavingsProgress').textContent = percentage + '%';
+            
+            // Calculate months to goal based on monthly saving of 3700 SAR
+            const monthlySaving = 3700; // Based on your salary and expenses
+            const remaining = goal - current;
+            const months = Math.ceil(remaining / monthlySaving);
+            document.getElementById('marriageSavingsTime').textContent = months > 0 ? months : 'Complete!';
+            
+            // Save to localStorage
+            saveToLocalStorage('marriageSavings', {
+                goal: goal,
+                current: current
+            });
+            
+            showToast('Marriage savings updated!', 'success');
+        }
+        
+        function saveMarriageData() {
+            const marriageData = {
+                timeline: document.getElementById('marriageTimeline').value,
+                financial: document.getElementById('financialReadiness').value,
+                personal: document.getElementById('personalReadiness').value,
+                housing: document.getElementById('housingReadiness').value,
+                notes: document.getElementById('marriageNotes').value,
+                knowledgeRights: document.getElementById('knowledgeRights').checked,
+                knowledgeCommunication: document.getElementById('knowledgeCommunication').checked,
+                knowledgeFamily: document.getElementById('knowledgeFamily').checked
+            };
+            
+            // Save to localStorage
+            saveToLocalStorage('marriageData', marriageData);
+            
+            // Also update the savings
+            updateMarriageSavings();
+            
+            showToast('Marriage data saved!', 'success');
+        }
+        
+        function loadMarriageData() {
+            // Load timeline and readiness data
+            const marriageData = loadFromLocalStorage('marriageData');
+            if (marriageData) {
+                document.getElementById('marriageTimeline').value = marriageData.timeline;
+                document.getElementById('financialReadiness').value = marriageData.financial;
+                document.getElementById('personalReadiness').value = marriageData.personal;
+                document.getElementById('housingReadiness').value = marriageData.housing;
+                document.getElementById('marriageNotes').value = marriageData.notes;
+                document.getElementById('knowledgeRights').checked = marriageData.knowledgeRights;
+                document.getElementById('knowledgeCommunication').checked = marriageData.knowledgeCommunication;
+                document.getElementById('knowledgeFamily').checked = marriageData.knowledgeFamily;
+                
+                updateMarriageTimelineValue(marriageData.timeline);
+                updateFinancialReadinessValue(marriageData.financial);
+                updatePersonalReadinessValue(marriageData.personal);
+                updateHousingReadinessValue(marriageData.housing);
+            }
+            
+            // Load savings
+            const marriageSavings = loadFromLocalStorage('marriageSavings');
+            if (marriageSavings) {
+                document.getElementById('marriageSavingsGoal').value = marriageSavings.goal;
+                document.getElementById('marriageSavingsCurrent').value = marriageSavings.current;
+                
+                // Calculate percentage
+                const percentage = Math.min(100, Math.round((marriageSavings.current / marriageSavings.goal) * 100));
+                
+                // Update progress bar
+                document.getElementById('marriageSavingsProgress').style.width = percentage + '%';
+                document.getElementById('marriageSavingsProgress').textContent = percentage + '%';
+                
+                // Calculate months to goal
+                const monthlySaving = 3700;
+                const remaining = marriageSavings.goal - marriageSavings.current;
+                const months = Math.ceil(remaining / monthlySaving);
+                document.getElementById('marriageSavingsTime').textContent = months > 0 ? months : 'Complete!';
+            }
+        }
+        
+        // Vehicle Functions
+        function updateVehicleTimelineValue(value) {
+            document.getElementById('vehicleTimelineValue').textContent = value;
+        }
+        
+        function updateVehicleSavings() {
+            const goal = document.getElementById('vehicleSavingsGoal').value;
+            const current = document.getElementById('vehicleSavingsCurrent').value;
+            
+            if (!goal || !current || isNaN(goal) || isNaN(current)) {
+                showToast('Please enter valid amounts', 'warning');
+                return;
+            }
+            
+            // Calculate percentage
+            const percentage = Math.min(100, Math.round((current / goal) * 100));
+            
+            // Update progress bar
+            document.getElementById('vehicleSavingsProgress').style.width = percentage + '%';
+            document.getElementById('vehicleSavingsProgress').textContent = percentage + '%';
+            
+            // Calculate months to goal based on monthly saving
+            const monthlySaving = 1000; // Adjusting for vehicle savings allocation
+            const remaining = goal - current;
+            const months = Math.ceil(remaining / monthlySaving);
+            document.getElementById('vehicleSavingsTime').textContent = months > 0 ? months : 'Complete!';
+            
+            // Save to localStorage
+            saveToLocalStorage('vehicleSavings', {
+                goal: goal,
+                current: current
+            });
+            
+            showToast('Vehicle savings updated!', 'success');
+        }
+        
+        function saveVehicleData() {
+            const vehicleData = {
+                timeline: document.getElementById('vehicleTimeline').value,
+                researchModels: document.getElementById('researchModels').checked,
+                researchCosts: document.getElementById('researchCosts').checked,
+                researchFinancing: document.getElementById('researchFinancing').checked,
+                researchInsurance: document.getElementById('researchInsurance').checked,
+                notes: document.getElementById('vehicleNotes').value
+            };
+            
+            // Save to localStorage
+            saveToLocalStorage('vehicleData', vehicleData);
+            
+            // Also update the savings
+            updateVehicleSavings();
+            
+            showToast('Vehicle data saved!', 'success');
+        }
+        
+        function loadVehicleData() {
+            // Load timeline and research data
+            const vehicleData = loadFromLocalStorage('vehicleData');
+            if (vehicleData) {
+                document.getElementById('vehicleTimeline').value = vehicleData.timeline;
+                document.getElementById('researchModels').checked = vehicleData.researchModels;
+                document.getElementById('researchCosts').checked = vehicleData.researchCosts;
+                document.getElementById('researchFinancing').checked = vehicleData.researchFinancing;
+                document.getElementById('researchInsurance').checked = vehicleData.researchInsurance;
+                document.getElementById('vehicleNotes').value = vehicleData.notes;
+                
+                updateVehicleTimelineValue(vehicleData.timeline);
+            }
+            
+            // Load savings
+            const vehicleSavings = loadFromLocalStorage('vehicleSavings');
+            if (vehicleSavings) {
+                document.getElementById('vehicleSavingsGoal').value = vehicleSavings.goal;
+                document.getElementById('vehicleSavingsCurrent').value = vehicleSavings.current;
+                
+                // Calculate percentage
+                const percentage = Math.min(100, Math.round((vehicleSavings.current / vehicleSavings.goal) * 100));
+                
+                // Update progress bar
+                document.getElementById('vehicleSavingsProgress').style.width = percentage + '%';
+                document.getElementById('vehicleSavingsProgress').textContent = percentage + '%';
+                
+                // Calculate months to goal
+                const monthlySaving = 1000;
+                const remaining = vehicleSavings.goal - vehicleSavings.current;
+                const months = Math.ceil(remaining / monthlySaving);
+                document.getElementById('vehicleSavingsTime').textContent = months > 0 ? months : 'Complete!';
+            }
+        }
+        
+        // Furnishing Functions
+        function updateFurnishingTimelineValue(value) {
+            document.getElementById('furnishingTimelineValue').textContent = value;
+        }
+        
+        function updateFurnishingBudget() {
+            const goal = document.getElementById('furnishingBudgetGoal').value;
+            const current = document.getElementById('furnishingBudgetCurrent').value;
+            
+            if (!goal || !current || isNaN(goal) || isNaN(current)) {
+                showToast('Please enter valid amounts', 'warning');
+                return;
+            }
+            
+            // Calculate percentage
+            const percentage = Math.min(100, Math.round((current / goal) * 100));
+            
+            // Update progress bar
+            document.getElementById('furnishingBudgetProgress').style.width = percentage + '%';
+            document.getElementById('furnishingBudgetProgress').textContent = percentage + '%';
+            
+            // Calculate months to goal based on monthly saving
+            const monthlySaving = 700; // Adjusting for furnishing savings allocation
+            const remaining = goal - current;
+            const months = Math.ceil(remaining / monthlySaving);
+            document.getElementById('furnishingSavingsTime').textContent = months > 0 ? months : 'Complete!';
+            
+            // Save to localStorage
+            saveToLocalStorage('furnishingBudget', {
+                goal: goal,
+                current: current
+            });
+            
+            showToast('Furnishing budget updated!', 'success');
+        }
+        
+        function updateLivingRoomValue(value) {
+            document.getElementById('livingRoomValue').textContent = value;
+            document.getElementById('livingRoomProgressBar').style.width = value + '%';
+            document.getElementById('livingRoomProgressBar').textContent = value + '%';
+        }
+        
+        function updateBedroomValue(value) {
+            document.getElementById('bedroomValue').textContent = value;
+            document.getElementById('bedroomProgressBar').style.width = value + '%';
+            document.getElementById('bedroomProgressBar').textContent = value + '%';
+        }
+        
+        function updateKitchenValue(value) {
+            document.getElementById('kitchenValue').textContent = value;
+            document.getElementById('kitchenProgressBar').style.width = value + '%';
+            document.getElementById('kitchenProgressBar').textContent = value + '%';
+        }
+        
+        function updateBathroomValue(value) {
+            document.getElementById('bathroomValue').textContent = value;
+            document.getElementById('bathroomProgressBar').style.width = value + '%';
+            document.getElementById('bathroomProgressBar').textContent = value + '%';
+        }
+        
+        function saveFurnishingData() {
+            const furnishingData = {
+                timeline: document.getElementById('furnishingTimeline').value,
+                livingRoom: document.getElementById('livingRoomProgress').value,
+                bedroom: document.getElementById('bedroomProgress').value,
+                kitchen: document.getElementById('kitchenProgress').value,
+                bathroom: document.getElementById('bathroomProgress').value,
+                notes: document.getElementById('furnishingNotes').value
+            };
+            
+            // Save to localStorage
+            saveToLocalStorage('furnishingData', furnishingData);
+            
+            // Also update the budget
+            updateFurnishingBudget();
+            
+            showToast('Furnishing data saved!', 'success');
+        }
+        
+        function loadFurnishingData() {
+            // Load timeline and room progress data
+            const furnishingData = loadFromLocalStorage('furnishingData');
+            if (furnishingData) {
+                document.getElementById('furnishingTimeline').value = furnishingData.timeline;
+                document.getElementById('livingRoomProgress').value = furnishingData.livingRoom;
+                document.getElementById('bedroomProgress').value = furnishingData.bedroom;
+                document.getElementById('kitchenProgress').value = furnishingData.kitchen;
+                document.getElementById('bathroomProgress').value = furnishingData.bathroom;
+                document.getElementById('furnishingNotes').value = furnishingData.notes;
+                
+                updateFurnishingTimelineValue(furnishingData.timeline);
+                updateLivingRoomValue(furnishingData.livingRoom);
+                updateBedroomValue(furnishingData.bedroom);
+                updateKitchenValue(furnishingData.kitchen);
+                updateBathroomValue(furnishingData.bathroom);
+            }
+            
+            // Load budget
+            const furnishingBudget = loadFromLocalStorage('furnishingBudget');
+            if (furnishingBudget) {
+                document.getElementById('furnishingBudgetGoal').value = furnishingBudget.goal;
+                document.getElementById('furnishingBudgetCurrent').value = furnishingBudget.current;
+                
+                // Calculate percentage
+                const percentage = Math.min(100, Math.round((furnishingBudget.current / furnishingBudget.goal) * 100));
+                
+                // Update progress bar
+                document.getElementById('furnishingBudgetProgress').style.width = percentage + '%';
+                document.getElementById('furnishingBudgetProgress').textContent = percentage + '%';
+                
+                // Calculate months to goal
+                const monthlySaving = 700;
+                const remaining = furnishingBudget.goal - furnishingBudget.current;
+                const months = Math.ceil(remaining / monthlySaving);
+                document.getElementById('furnishingSavingsTime').textContent = months > 0 ? months : 'Complete!';
+            }
+        }
+        
+        // Career Functions
+        function updateSkillProgressValue(value) {
+            document.getElementById('skillProgressValue').textContent = value;
+            document.getElementById('skillProgressBar').style.width = value + '%';
+            document.getElementById('skillProgressBar').textContent = value + '%';
+        }
+        
+        function saveCareerData() {
+            const careerData = {
+                shortTerm: document.getElementById('careerShortTerm').value,
+                midTerm: document.getElementById('careerMidTerm').value,
+                longTerm: document.getElementById('careerLongTerm').value,
+                currentSkill: document.getElementById('currentSkill').value,
+                skillProgress: document.getElementById('skillProgress').value,
+                currentSalary: document.getElementById('currentSalary').value,
+                targetSalary: document.getElementById('targetSalary').value
+            };
+            
+            // Save to localStorage
+            saveToLocalStorage('careerData', careerData);
+            
+            // Update the salary progress bar
+            const percentage = Math.min(100, Math.round((careerData.currentSalary / careerData.targetSalary) * 100));
+            document.getElementById('salaryProgress').style.width = percentage + '%';
+            document.getElementById('salaryProgress').textContent = percentage + '%';
+            
+            showToast('Career data saved!', 'success');
+        }
+        
+        function loadCareerData() {
+            const careerData = loadFromLocalStorage('careerData');
+            if (!careerData) return;
+            
+            document.getElementById('careerShortTerm').value = careerData.shortTerm;
+            document.getElementById('careerMidTerm').value = careerData.midTerm;
+            document.getElementById('careerLongTerm').value = careerData.longTerm;
+            document.getElementById('currentSkill').value = careerData.currentSkill;
+            document.getElementById('skillProgress').value = careerData.skillProgress;
+            document.getElementById('currentSalary').value = careerData.currentSalary;
+            document.getElementById('targetSalary').value = careerData.targetSalary;
+            
+            updateSkillProgressValue(careerData.skillProgress);
+            
+            // Update salary progress bar
+            const percentage = Math.min(100, Math.round((careerData.currentSalary / careerData.targetSalary) * 100));
+            document.getElementById('salaryProgress').style.width = percentage + '%';
+            document.getElementById('salaryProgress').textContent = percentage + '%';
+        }
+        
+        // Dark Mode Toggle
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        darkModeToggle.addEventListener('click', function() {
+            document.body.classList.toggle('dark-mode');
+            
+            if (document.body.classList.contains('dark-mode')) {
+                darkModeToggle.innerHTML = '<i class="bi bi-sun"></i>';
+                document.documentElement.style.setProperty('--emerald-dark', '#00a86b');
+                document.documentElement.style.setProperty('--emerald-medium', '#00c17c');
+                document.documentElement.style.setProperty('--emerald-light', '#00d98d');
+                document.documentElement.style.setProperty('--emerald-lighter', '#1e2e2a');
+                document.body.style.backgroundColor = '#121212';
+                document.body.style.color = '#e0e0e0';
+            } else {
+                darkModeToggle.innerHTML = '<i class="bi bi-moon-stars"></i>';
+                document.documentElement.style.setProperty('--emerald-dark', '#006643');
+                document.documentElement.style.setProperty('--emerald-medium', '#00875a');
+                document.documentElement.style.setProperty('--emerald-light', '#00a86b');
+                document.documentElement.style.setProperty('--emerald-lighter', '#e6f7f0');
+                document.body.style.backgroundColor = '#f8f9fa';
+                document.body.style.color = 'initial';
+            }
+            
+            // Save preference
+            saveToLocalStorage('darkMode', document.body.classList.contains('dark-mode'));
+        });
+        
+        // Check if dark mode was previously enabled
+        if (loadFromLocalStorage('darkMode')) {
+            darkModeToggle.click();
+        }
+    </script>
+</body>
+</html>
