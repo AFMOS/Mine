@@ -1,20 +1,21 @@
 const { GoogleSpreadsheet } = require('google-spreadsheet');
 
-// Create a Google Service Account and download JSON key
-// Add the private key to Netlify Environment Variables
+// Get environment variables
 const GOOGLE_SERVICE_ACCOUNT_EMAIL = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
-const GOOGLE_PRIVATE_KEY = process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n');
+const GOOGLE_PRIVATE_KEY_B64 = process.env.GOOGLE_PRIVATE_KEY_B64;
 const SHEET_ID = process.env.SHEET_ID;
 
+// Decode the base64-encoded private key
+const GOOGLE_PRIVATE_KEY = Buffer.from(GOOGLE_PRIVATE_KEY_B64, 'base64').toString();
+
 exports.handler = async function(event, context) {
-  // Enable CORS for your domain
+  // Enable CORS
   const headers = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type',
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
   };
   
-  // Handle preflight OPTIONS request
   if (event.httpMethod === 'OPTIONS') {
     return {
       statusCode: 200,
@@ -24,70 +25,28 @@ exports.handler = async function(event, context) {
   }
   
   try {
-    const doc = new GoogleSpreadsheet(SHEET_ID);
-    
-    // Authenticate with Google
-    await doc.useServiceAccountAuth({
-      client_email: GOOGLE_SERVICE_ACCOUNT_EMAIL,
-      private_key: GOOGLE_PRIVATE_KEY,
-    });
-    
-    await doc.loadInfo(); // Load sheet data
-    
-    if (event.httpMethod === 'GET') {
-      // Handle GET request - read data from sheet
-      const sheet = doc.sheetsByIndex[0]; // Get the first sheet
-      console.log("Sheet headers:", sheet.headerValues);
-      
-      // Just return success to check connectivity
-      return {
-        statusCode: 200,
-        headers,
-        body: JSON.stringify({
-          success: true,
-          message: "Connected to Google Sheets successfully",
-          headers: sheet.headerValues
-        })
-      };
-    } 
-    else if (event.httpMethod === 'POST') {
-      // Handle POST request - save data to sheet
-      const payload = JSON.parse(event.body);
-      const sheet = doc.sheetsByIndex[0];
-      
-      // For saving all app data, create a date-stamped backup row
-      const row = {
-        timestamp: new Date().toISOString(),
-        userId: payload.userId || 'anonymous',
-        data: JSON.stringify(payload.data)
-      };
-      
-      // Log information without waiting
-      console.log("Attempting to add row with headers:", sheet.headerValues);
-      
-      // Add the row and return success
-      await sheet.addRow(row);
-      
-      return {
-        statusCode: 200,
-        headers,
-        body: JSON.stringify({ success: true, message: 'Data saved successfully' })
-      };
-    }
-    
+    // Simple test first
     return {
-      statusCode: 405,
+      statusCode: 200,
       headers,
-      body: JSON.stringify({ error: 'Method not allowed' })
+      body: JSON.stringify({ 
+        message: 'Test successful',
+        email: GOOGLE_SERVICE_ACCOUNT_EMAIL,
+        sheet: SHEET_ID,
+        keyLength: GOOGLE_PRIVATE_KEY.length
+      })
     };
+    
+    // The rest of your Google Sheets code would go here
+    // but let's first test if we can get the basic connection working
   } 
   catch (error) {
-    console.error('Error accessing sheet:', error);
+    console.error('Error:', error);
     
     return {
       statusCode: 500,
       headers,
-      body: JSON.stringify({ error: 'Failed to access Google Sheet', details: error.message })
+      body: JSON.stringify({ error: error.message })
     };
   }
 };
