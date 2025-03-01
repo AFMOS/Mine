@@ -1405,17 +1405,16 @@
         
         // Check connection status
         function checkConnectionStatus() {
-            // Simulate checking connection (in a real app, this would be an actual API call)
-            fetch(CORS_PROXY + encodeURIComponent(GOOGLE_SHEET_URL), { method: 'HEAD' })
-                .then(response => {
-                    updateConnectionStatus(response.ok);
-                })
-                .catch(error => {
-                    console.error('Connection error:', error);
-                    updateConnectionStatus(false);
-                });
-        }
-        
+    fetch('/api/sheet-sync', { method: 'HEAD' })
+        .then(response => {
+            updateConnectionStatus(response.ok);
+        })
+        .catch(error => {
+            console.error('Connection error:', error);
+            updateConnectionStatus(false);
+        });
+}
+
         // Populate Surah dropdowns with color coding for memorized surahs
         function populateSurahDropdowns() {
             const currentSurahSelect = document.getElementById('currentSurah');
@@ -1782,6 +1781,73 @@
         
         showToast('Failed to sync data. Please try again.', 'danger');
     });
+}
+
+function syncDataFromSheet() {
+    const status = document.getElementById('syncStatus');
+    status.textContent = 'Loading data from cloud...';
+    status.className = 'sync-status text-primary';
+    
+    fetch('/api/sheet-sync')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Update connection status
+            updateConnectionStatus(true);
+            
+            // Find the latest data entry
+            const latestEntry = data.sort((a, b) => 
+                new Date(b.timestamp) - new Date(a.timestamp)
+            )[0];
+            
+            if (latestEntry && latestEntry.data) {
+                // Parse the stored JSON data
+                const appData = JSON.parse(latestEntry.data);
+                
+                // Update all localStorage items
+                Object.keys(appData).forEach(key => {
+                    saveToLocalStorage(key, appData[key]);
+                });
+                
+                status.textContent = 'Data loaded from cloud!';
+                status.className = 'sync-status text-success';
+                
+                setTimeout(() => {
+                    status.textContent = '';
+                    loadAllData(); // Reload all data from localStorage
+                }, 3000);
+                
+                showToast('Data successfully synced from cloud!', 'success');
+            } else {
+                status.textContent = 'No data found in cloud';
+                status.className = 'sync-status text-warning';
+                
+                setTimeout(() => {
+                    status.textContent = '';
+                }, 3000);
+                
+                showToast('No previous data found in cloud storage', 'info');
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching data:', error);
+            
+            // Update connection status
+            updateConnectionStatus(false);
+            
+            status.textContent = 'Error loading data';
+            status.className = 'sync-status text-danger';
+            
+            setTimeout(() => {
+                status.textContent = '';
+            }, 3000);
+            
+            showToast('Failed to load data from cloud. Please try again.', 'danger');
+        });
 }
 
 // Replace your existing syncDataFromSheet function similarly:
