@@ -9,7 +9,7 @@ const SHEET_ID = process.env.SHEET_ID;
 exports.handler = async function(event, context) {
   // Enable CORS for your domain
   const headers = {
-    'Access-Control-Allow-Origin': '*', // Lock this down to your actual domain in production
+    'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type',
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
   };
