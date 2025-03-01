@@ -1,13 +1,15 @@
 const { GoogleSpreadsheet } = require('google-spreadsheet');
+const { JWT } = require('google-auth-library');
+
 // Get environment variables
 const GOOGLE_SERVICE_ACCOUNT_EMAIL = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
 const GOOGLE_PRIVATE_KEY_B64 = process.env.GOOGLE_PRIVATE_KEY_B64;
 const SHEET_ID = process.env.SHEET_ID;
+
 // Decode the base64-encoded private key
 const GOOGLE_PRIVATE_KEY = Buffer.from(GOOGLE_PRIVATE_KEY_B64, 'base64').toString();
 
 exports.handler = async function(event, context) {
-  // Enable CORS
   const headers = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type',
@@ -22,40 +24,25 @@ exports.handler = async function(event, context) {
     };
   }
   
-  // Handle different HTTP methods
-  if (event.httpMethod === 'GET' && event.path === '/.netlify/functions/sheet-sync/test') {
-    // This is the test endpoint that was working before
-    return {
-      statusCode: 200,
-      headers,
-      body: JSON.stringify({ 
-        message: 'Test successful',
-        email: GOOGLE_SERVICE_ACCOUNT_EMAIL,
-        sheet: SHEET_ID,
-        keyLength: GOOGLE_PRIVATE_KEY.length
-      })
-    };
-  }
-  
   try {
-    // Now try to actually connect to Google Sheets
-    const doc = new GoogleSpreadsheet(SHEET_ID);
-    
-    // Authenticate with Google
-    await doc.useServiceAccountAuth({
-      client_email: GOOGLE_SERVICE_ACCOUNT_EMAIL,
-      private_key: GOOGLE_PRIVATE_KEY,
+    // Create a JWT client directly
+    const client = new JWT({
+      email: GOOGLE_SERVICE_ACCOUNT_EMAIL,
+      key: GOOGLE_PRIVATE_KEY,
+      scopes: ['https://www.googleapis.com/auth/spreadsheets'],
     });
     
-    await doc.loadInfo(); // Load sheet data
+    // No need to authenticate separately, just create the doc with the client
+    const doc = new GoogleSpreadsheet(SHEET_ID);
+    doc.useServiceAccountAuth(client);
+    
+    await doc.loadInfo();
     
     if (event.httpMethod === 'GET') {
-      // Handle GET request - read data from sheet
-      const sheet = doc.sheetsByIndex[0]; // Get the first sheet
+      const sheet = doc.sheetsByIndex[0];
       const rows = await sheet.getRows();
       
       const data = rows.map(row => {
-        // Convert row to a plain object
         const rowData = {};
         sheet.headerValues.forEach(header => {
           rowData[header] = row[header];
@@ -70,11 +57,9 @@ exports.handler = async function(event, context) {
       };
     } 
     else if (event.httpMethod === 'POST') {
-      // Handle POST request - save data to sheet
       const payload = JSON.parse(event.body);
       const sheet = doc.sheetsByIndex[0];
       
-      // For saving all app data, create a date-stamped backup row
       const row = {
         timestamp: new Date().toISOString(),
         userId: payload.userId || 'anonymous',
@@ -102,11 +87,7 @@ exports.handler = async function(event, context) {
     return {
       statusCode: 500,
       headers,
-      body: JSON.stringify({ 
-        error: 'Function error', 
-        message: error.message,
-        stack: error.stack
-      })
+      body: JSON.stringify({ error: error.message, stack: error.stack })
     };
   }
 };
