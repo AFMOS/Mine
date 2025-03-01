@@ -3,15 +3,13 @@ const { GoogleSpreadsheet } = require('google-spreadsheet');
 // Create a Google Service Account and download JSON key
 // Add the private key to Netlify Environment Variables
 const GOOGLE_SERVICE_ACCOUNT_EMAIL = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
-const GOOGLE_PRIVATE_KEY = process.env.GOOGLE_PRIVATE_KEY_B64 
-  ? Buffer.from(process.env.GOOGLE_PRIVATE_KEY_B64, 'base64').toString()
-  : process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n');
+const GOOGLE_PRIVATE_KEY = process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n');
 const SHEET_ID = process.env.SHEET_ID;
 
 exports.handler = async function(event, context) {
   // Enable CORS for your domain
   const headers = {
-    'Access-Control-Allow-Origin': '*', // Lock this down to your actual domain in production
+    'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type',
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
   };
@@ -39,21 +37,17 @@ exports.handler = async function(event, context) {
     if (event.httpMethod === 'GET') {
       // Handle GET request - read data from sheet
       const sheet = doc.sheetsByIndex[0]; // Get the first sheet
-      const rows = await sheet.getRows();
+      console.log("Sheet headers:", sheet.headerValues);
       
-      const data = rows.map(row => {
-        // Convert row to a plain object
-        const rowData = {};
-        sheet.headerValues.forEach(header => {
-          rowData[header] = row[header];
-        });
-        return rowData;
-      });
-      
+      // Just return success to check connectivity
       return {
         statusCode: 200,
         headers,
-        body: JSON.stringify(data)
+        body: JSON.stringify({
+          success: true,
+          message: "Connected to Google Sheets successfully",
+          headers: sheet.headerValues
+        })
       };
     } 
     else if (event.httpMethod === 'POST') {
@@ -61,42 +55,24 @@ exports.handler = async function(event, context) {
       const payload = JSON.parse(event.body);
       const sheet = doc.sheetsByIndex[0];
       
-      try {
-        // Convert to array format for sheet
-        const rows = [];
-        
-        // Handle the payload based on your data structure
-        if (payload.dataType === 'allData') {
-          // For saving all app data, create a date-stamped backup row
-          const row = {
-            timestamp: new Date().toISOString(),
-            userId: payload.userId || 'anonymous',
-            data: JSON.stringify(payload.data)
-          };
-          
-          console.log('Attempting to add row:', row);
-          await sheet.addRow(row);
-          console.log('Row added successfully');
-        }
-        
-        return {
-          statusCode: 200,
-          headers,
-          body: JSON.stringify({ 
-            success: true, 
-            message: 'Data saved successfully',
-            headers: sheet.headerValues,
-            rowCount: (await sheet.getRows()).length
-          })
-        };
-      } catch (rowError) {
-        console.error('Error adding row:', rowError);
-        return {
-          statusCode: 500,
-          headers,
-          body: JSON.stringify({ error: 'Failed to add row to sheet', details: rowError.message })
-        };
-      }
+      // For saving all app data, create a date-stamped backup row
+      const row = {
+        timestamp: new Date().toISOString(),
+        userId: payload.userId || 'anonymous',
+        data: JSON.stringify(payload.data)
+      };
+      
+      // Log information without waiting
+      console.log("Attempting to add row with headers:", sheet.headerValues);
+      
+      // Add the row and return success
+      await sheet.addRow(row);
+      
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify({ success: true, message: 'Data saved successfully' })
+      };
     }
     
     return {
